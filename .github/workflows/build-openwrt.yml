@@ -75,6 +75,7 @@ jobs:
         git clone https://github.com/xiaorouji/openwrt-passwall package/passwall
         git clone https://github.com/xiaorouji/openwrt-passwall2 package/passwall2
         git clone https://github.com/fw876/helloworld package/helloworld
+        wget https://github.com/hellyouhun/openwrt/raw/main/package/redsocks2/Makefile package/redsocks2/Makefile
 
     - name: Update feeds
       run: cd openwrt && ./scripts/feeds update -a
