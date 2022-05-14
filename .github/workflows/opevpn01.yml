@@ -76,7 +76,7 @@ jobs:
         echo 'src-git passwall https://github.com/xiaorouji/openwrt-passwall2' >> feeds.conf.default
         echo 'src-git helloworld https://github.com/fw876/helloworld' >> feeds.conf.default
         chmod +x package
-        git clone https://github.com/hellyouhun/redsocks2 packages/master/net/redsocks2
+        git clone https://github.com/hellyouhun/redsocks2 packages/redsocks2
 #       echo 'src-git lienol https://github.com/Lienol/openwrt-package.git;main' >> feeds.conf.default
 #      echo 'src-git other https://github.com/Lienol/openwrt-package.git;other' >> feeds.conf.default
     - name: Update feeds
