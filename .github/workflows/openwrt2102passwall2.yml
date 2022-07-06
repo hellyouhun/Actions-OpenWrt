@@ -24,8 +24,8 @@ env:
   REPO_BRANCH: 21.02
   FEEDS_CONF: feeds.conf.default
   CONFIG_FILE: .configpasswall2
-  DIY_P1_SH: diy-part1.sh
-  DIY_P2_SH: diy-part2.sh
+#  DIY_P1_SH: diy-part1.sh
+#  DIY_P2_SH: diy-part2.sh
   UPLOAD_BIN_DIR: false
   UPLOAD_FIRMWARE: true
   UPLOAD_COWTRANSFER: false
@@ -68,9 +68,11 @@ jobs:
         cd openwrt
         $GITHUB_WORKSPACE/$DIY_P1_SH
 
-#    - name: git clone app
-#      run: |
-#        cd openwrt
+    - name: git clone app
+      run: |
+        cd openwrt
+        echo 'src-git diy1 https://github.com/xiaorouji/openwrt-passwall' >> feeds.conf.default
+        echo 'src-git passwall https://github.com/xiaorouji/openwrt-passwall2' >> feeds.conf.default
 #        chmod +x package
 #        git clone https://github.com/hellyouhun/redsocks2 packages/master/net/redsocks2
 #        git clone https://github.com/xiaorouji/openwrt-passwall package/passwall
