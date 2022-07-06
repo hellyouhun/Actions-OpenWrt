@@ -71,7 +71,7 @@ jobs:
 #    - name: git clone app
 #      run: |
 #        cd openwrt
-#       chmod +x package
+#        chmod +x package
 #        git clone https://github.com/hellyouhun/redsocks2 packages/master/net/redsocks2
 #        git clone https://github.com/xiaorouji/openwrt-passwall package/passwall
 #        git clone https://github.com/xiaorouji/openwrt-passwall2 package/passwall2
