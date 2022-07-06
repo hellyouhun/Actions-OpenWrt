@@ -68,14 +68,14 @@ jobs:
         cd openwrt
         $GITHUB_WORKSPACE/$DIY_P1_SH
 
-    - name: git clone app
-      run: |
-        cd openwrt
-        chmod +x package
-        git clone https://github.com/hellyouhun/redsocks2 packages/master/net/redsocks2
-        git clone https://github.com/xiaorouji/openwrt-passwall package/passwall
-        git clone https://github.com/xiaorouji/openwrt-passwall2 package/passwall2
-        git clone https://github.com/fw876/helloworld package/helloworld
+#    - name: git clone app
+#      run: |
+#        cd openwrt
+#       chmod +x package
+#        git clone https://github.com/hellyouhun/redsocks2 packages/master/net/redsocks2
+#        git clone https://github.com/xiaorouji/openwrt-passwall package/passwall
+#        git clone https://github.com/xiaorouji/openwrt-passwall2 package/passwall2
+#        git clone https://github.com/fw876/helloworld package/helloworld
 
     - name: Update feeds
       run: cd openwrt && ./scripts/feeds update -a
