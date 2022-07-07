@@ -8,7 +8,7 @@
 # Description: Build OpenWrt using GitHub Actions
 #
 
-name: master-passwall2
+name: master-wan3-passwall2
 
 on:
   repository_dispatch:
