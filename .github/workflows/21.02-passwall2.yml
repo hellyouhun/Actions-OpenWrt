@@ -8,7 +8,7 @@
 # Description: Build OpenWrt using GitHub Actions
 #
 
-name: 21.02-passwall2
+name: 21.02-passwall2+ssrp
 
 on:
   repository_dispatch:
@@ -23,7 +23,7 @@ env:
   REPO_URL: https://github.com/Lienol/openwrt
   REPO_BRANCH: 21.02
   FEEDS_CONF: feeds.conf.default
-  CONFIG_FILE: .2102pass
+  CONFIG_FILE: .2102passssrp
   DIY_P1_SH: diy-part1.sh
   DIY_P2_SH: diy-part2.sh
   UPLOAD_BIN_DIR: false
@@ -72,7 +72,7 @@ jobs:
     - name: git clone app
       run: |
         cd openwrt
-        echo 'src-git diy1 https://github.com/xiaorouji/openwrt-passwall' >> feeds.conf.default
+        echo 'src-git passwalldiy1 https://github.com/xiaorouji/openwrt-passwall' >> feeds.conf.default
         echo 'src-git passwall https://github.com/xiaorouji/openwrt-passwall2' >> feeds.conf.default
         echo "src-git helloworld https://github.com/fw876/helloworld.git" >> "feeds.conf.default"
 #        chmod -R 777 package
