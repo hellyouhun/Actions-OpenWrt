@@ -36,8 +36,6 @@ env:
 jobs: 
   build:
     runs-on: ubuntu-20.04
-    container: node:14.16
-
 
     steps:
     - name: Checkout
