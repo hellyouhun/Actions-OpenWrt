@@ -37,9 +37,13 @@ jobs:
   build:
     runs-on: ubuntu-20.04
     container: node:14.16
+
+
     steps:
     - name: Checkout
       uses: actions/checkout@main
+      with:
+        node-version: '16'
 
     - name: Initialization environment
       env:
