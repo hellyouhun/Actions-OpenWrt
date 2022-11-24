@@ -74,6 +74,7 @@ jobs:
         cd openwrt
         echo 'src-git diy1 https://github.com/xiaorouji/openwrt-passwall' >> feeds.conf.default
         echo 'src-git passwall https://github.com/xiaorouji/openwrt-passwall2' >> feeds.conf.default
+        echo "src-git helloworld https://github.com/fw876/helloworld.git" >> "feeds.conf.default"
 #        chmod -R 777 package
 #        git clone https://github.com/hellyouhun/redsocks2 packages/master/net/redsocks2
 #        git clone https://github.com/xiaorouji/openwrt-passwall package/passwall
