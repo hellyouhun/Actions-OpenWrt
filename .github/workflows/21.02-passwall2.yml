@@ -32,7 +32,8 @@ env:
   UPLOAD_WETRANSFER: false
   UPLOAD_RELEASE: false
   TZ: Asia/Shanghai
-  
+
+
 jobs: 
   build:
     runs-on: ubuntu-20.04
@@ -44,7 +45,8 @@ jobs:
     - uses: actions/setup-node@v3
       with:
         node-version: '16'
-
+    - run: npm install -g bats
+    - run: bats -v
     - name: Initialization environment
       env:
         DEBIAN_FRONTEND: noninteractive
