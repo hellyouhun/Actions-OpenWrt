@@ -86,7 +86,8 @@ jobs:
 #        git clone https://github.com/xiaorouji/openwrt-passwall package/passwall
 #        git clone https://github.com/xiaorouji/openwrt-passwall2 package/passwall2
 #        git clone --depth=1 https://github.com/fw876/helloworld.git package/helloworld
-
+    - name: clean feeds
+      run: cd openwrt && ./scripts/feeds clean
     - name: Update feeds
       run: cd openwrt && ./scripts/feeds update -a
 
