@@ -80,9 +80,10 @@ jobs:
     - name: git clone app
       run: |
         cd openwrt
-        echo 'src-git passwalldiy1 https://github.com/xiaorouji/openwrt-passwall' >> feeds.conf.default
-        echo 'src-git passwall https://github.com/xiaorouji/openwrt-passwall2' >> feeds.conf.default
-        echo "src-git helloworld https://github.com/fw876/helloworld.git" >> "feeds.conf.default"
+        echo 'src-git passwall1 https://github.com/xiaorouji/openwrt-passwall.git;packages' >> feeds.conf.default
+        echo 'src-git passwallluci https://github.com/xiaorouji/openwrt-passwall.git;luci' >> feeds.conf.default
+        echo 'src-git passwall2 https://github.com/xiaorouji/openwrt-passwall2' >> feeds.conf.default
+        echo 'src-git helloworld https://github.com/fw876/helloworld.git' >> feeds.conf.default
 #        chmod -R 777 package
 #        git clone https://github.com/hellyouhun/redsocks2 packages/master/net/redsocks2
 #        git clone https://github.com/xiaorouji/openwrt-passwall package/passwall
