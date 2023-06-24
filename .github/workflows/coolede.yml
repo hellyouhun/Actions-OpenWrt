@@ -82,6 +82,8 @@ jobs:
         echo 'src-git passwalldiy1 https://github.com/xiaorouji/openwrt-passwall' >> feeds.conf.default
         echo 'src-git passwall2 https://github.com/xiaorouji/openwrt-passwall2' >> feeds.conf.default
         echo 'src-git helloworld https://github.com/fw876/helloworld.git' >> feeds.conf.default
+        git clone -b lede --single-branch https://github.com/pymumu/luci-app-smartdns.git package/smartdns/luci-app-smartdns
+        git clone https://github.com/pymumu/openwrt-smartdns.git package/smartdns/smartdns
 #        echo 'src-git passwall1 https://github.com/xiaorouji/openwrt-passwall.git;packages' >> feeds.conf.default
 #        chmod -R 777 package
 #        git clone https://github.com/hellyouhun/redsocks2 packages/master/net/redsocks2
