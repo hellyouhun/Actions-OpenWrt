@@ -78,8 +78,8 @@ jobs:
     - name: git clone app
       run: |
         cd openwrt
-        echo 'src-git passwalldiy https://github.com/xiaorouji/openwrt-passwall.git;packages' >> feeds.conf.default
-        echo 'src-git passwall2 https://github.com/xiaorouji/openwrt-passwall2' >> feeds.conf.default
+        echo 'src-git passwall_packages https://github.com/xiaorouji/openwrt-passwall-packages.git;main" >> "feeds.conf.default"
+        echo 'src-git passwall2 https://github.com/xiaorouji/openwrt-passwall2.git;main" >> "feeds.conf.default"
 #        echo 'src-git helloworld https://github.com/fw876/helloworld.git' >> feeds.conf.default
 #        git clone -b lede --single-branch https://github.com/pymumu/luci-app-smartdns.git package/smartdns/luci-app-smartdns
 #        git clone https://github.com/pymumu/openwrt-smartdns.git package/smartdns/smartdns
