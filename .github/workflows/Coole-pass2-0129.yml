@@ -58,7 +58,7 @@ jobs:
         sudo -E apt-get -qq clean
         sudo timedatectl set-timezone "$TZ"
         sudo mkdir -p /openwrt
-        sudo chown $USER:$GROUPS /openwrt
+#        sudo chown $USER:$GROUPS /openwrt
 #        sudo mkdir -p /workdir
 #        sudo chown $USER:$GROUPS /workdir
 #        sudo -E apt-get -qq install $(curl -fsSL git.io/depends-ubuntu-2004)
