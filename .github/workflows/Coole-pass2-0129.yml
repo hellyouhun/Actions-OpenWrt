@@ -63,13 +63,13 @@ jobs:
 #        sudo chown $USER:$GROUPS /workdir
 #        sudo -E apt-get -qq install $(curl -fsSL git.io/depends-ubuntu-2004)
     - name: Clone source code
-      working-directory: /root
+#      working-directory: /root
 #      working-directory: /workdir
       run: |
         df -hT $PWD
         git clone $REPO_URL -b $REPO_BRANCH openwrt
         chmod -R 777 openwrt
-        ln -sf /openwrt $GITHUB_WORKSPACE/openwrt
+#        ln -sf /openwrt $GITHUB_WORKSPACE/openwrt
 #        ln -sf /workdir/openwrt $GITHUB_WORKSPACE/openwrt
 
     - name: Load custom feeds
