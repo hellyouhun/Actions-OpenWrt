@@ -42,6 +42,7 @@ jobs:
     - name: Checkout
       run: |
        sudo rm -rf /usr/share/dotnet
+       sudo rm -rf "/usr/local/share/boost"
        sudo rm -rf "$AGENT_TOOLSDIRECTORY"
        sudo tune2fs -m 1 /dev/vda1
     - uses: actions/checkout@main
