@@ -44,6 +44,8 @@ jobs:
        sudo rm -rf /usr/share/dotnet
        sudo rm -rf "/usr/local/share/boost"
        sudo rm -rf "$AGENT_TOOLSDIRECTORY"
+       sudo tune2fs -m 0.0001 /dev/sdb1
+       sudo tune2fs -m 0.0001 /dev/root
     - uses: actions/checkout@main
     - uses: actions/checkout@v4
     - uses: actions/setup-node@v4
@@ -51,52 +53,6 @@ jobs:
         node-version: '20'
     - run: npm install -g bats
     - run: bats -v
-    - name: Before freeing up disk space
-      run: |
-        echo "Before freeing up disk space"
-        echo "=============================================================================="
-        df -hT
-        echo "=============================================================================="
-
-    - name: "Optimize Disk Space"
-      uses: "hugoalh/disk-space-optimizer-ghaction@v0.8.1"
-      with:
-        operate_sudo: "True"
-        general_include: ".+"
-        general_exclude: |-
-          ^GCC$
-          ^G\+\+$
-          Clang
-          LLVM
-        docker_include: ".+"
-        docker_prune: "True"
-        docker_clean: "True"
-        apt_prune: "True"
-        apt_clean: "True"
-        homebrew_prune: "True"
-        homebrew_clean: "True"
-        npm_prune: "True"
-        npm_clean: "True"
-        os_swap: "True"
-
-    - name: Freeing up disk space
-      uses: easimon/maximize-build-space@master
-      with: 
-        root-reserve-mb: 2048
-        swap-size-mb: 1
-        remove-dotnet: 'true'
-        remove-android: 'true'
-        remove-haskell: 'true'
-        remove-codeql: 'true'
-        remove-docker-images: 'true'
-
-    - name: Free up disk space complete
-      run: |
-        echo "Free up disk space complete"
-        echo "=============================================================================="
-        df -hT
-        echo "=============================================================================="
-
     - name: Initialization environment
       env:
         DEBIAN_FRONTEND: noninteractive
@@ -109,20 +65,16 @@ jobs:
         sudo rm -rf /etc/apt/sources.list.d/* /usr/local/lib/android /opt/ghc /usr/share/dotnet /usr/local/graalvm /usr/local/.ghcup \
         /usr/local/share/powershell /usr/local/share/chromium /usr/local/lib/node_modules
         sudo timedatectl set-timezone "$TZ"
-        sudo chown $USER:$GROUPS $GITHUB_WORKSPACE
-#        sudo mkdir -p /workdir
-#        sudo chown $USER:$GROUPS /workdir
-#        sudo -E apt-get -qq install $(curl -fsSL git.io/depends-ubuntu-2004)
+        sudo mkdir -p /workdir
+        sudo chown $USER:$GROUPS /workdir
+        sudo -E apt-get -qq install $(curl -fsSL git.io/depends-ubuntu-2004)
     - name: Clone source code
-      working-directory: ./
-#      working-directory: /workdir
+      working-directory: /workdir
       run: |
-       git clone --depth=1 $REPO_URL -b $REPO_BRANCH openwrt
-       chmod -R 777 openwrt
-#        df -hT $PWD
-#        git clone $REPO_URL -b $REPO_BRANCH openwrt
-#         chmod -R 777 openwrt
-#        ln -sf /workdir/openwrt $GITHUB_WORKSPACE/openwrt
+        df -hT $PWD
+        git clone $REPO_URL -b $REPO_BRANCH openwrt
+         chmod -R 777 openwrt
+        ln -sf /workdir/openwrt $GITHUB_WORKSPACE/openwrt
 
     - name: Load custom feeds
       run: |
