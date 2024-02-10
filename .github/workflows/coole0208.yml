@@ -39,13 +39,15 @@ jobs:
     runs-on: ubuntu-22.04
 
     steps:
-    - name: Checkout
+    - name: Freeing up disk space
       run: |
        sudo rm -rf /usr/share/dotnet
        sudo rm -rf "/usr/local/share/boost"
        sudo rm -rf "$AGENT_TOOLSDIRECTORY"
        sudo tune2fs -m 0.0001 /dev/sdb1
        sudo tune2fs -m 0.0001 /dev/root
+    - name: Checkout
+      run: |
     - uses: actions/checkout@main
     - uses: actions/checkout@v4
     - uses: actions/setup-node@v4
