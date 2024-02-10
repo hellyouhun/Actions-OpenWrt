@@ -109,16 +109,20 @@ jobs:
         sudo rm -rf /etc/apt/sources.list.d/* /usr/local/lib/android /opt/ghc /usr/share/dotnet /usr/local/graalvm /usr/local/.ghcup \
         /usr/local/share/powershell /usr/local/share/chromium /usr/local/lib/node_modules
         sudo timedatectl set-timezone "$TZ"
-        sudo mkdir -p /workdir
-        sudo chown $USER:$GROUPS /workdir
+        sudo chown $USER:$GROUPS $GITHUB_WORKSPACE
+#        sudo mkdir -p /workdir
+#        sudo chown $USER:$GROUPS /workdir
 #        sudo -E apt-get -qq install $(curl -fsSL git.io/depends-ubuntu-2004)
     - name: Clone source code
-      working-directory: /workdir
+      working-directory: ./
+#      working-directory: /workdir
       run: |
-        df -hT $PWD
-        git clone $REPO_URL -b $REPO_BRANCH openwrt
-        chmod -R 777 openwrt
-        ln -sf /workdir/openwrt $GITHUB_WORKSPACE/openwrt
+       git clone --depth=1 $REPO_URL -b $REPO_BRANCH openwrt
+       chmod -R 777 openwrt
+#        df -hT $PWD
+#        git clone $REPO_URL -b $REPO_BRANCH openwrt
+#         chmod -R 777 openwrt
+#        ln -sf /workdir/openwrt $GITHUB_WORKSPACE/openwrt
 
     - name: Load custom feeds
       run: |
