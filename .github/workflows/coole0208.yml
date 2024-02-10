@@ -43,6 +43,7 @@ jobs:
       run: |
        sudo rm -rf /usr/share/dotnet
        sudo rm -rf "$AGENT_TOOLSDIRECTORY"
+       sudo tune2fs -m 1 /dev/vda1
     - uses: actions/checkout@main
     - uses: actions/checkout@v4
     - uses: actions/setup-node@v4
