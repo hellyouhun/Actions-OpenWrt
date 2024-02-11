@@ -41,11 +41,13 @@ jobs:
     steps:
     - name: Freeing up disk space
       run: |
+       df -hT
        sudo rm -rf /usr/share/dotnet
        sudo rm -rf "/usr/local/share/boost"
        sudo rm -rf "$AGENT_TOOLSDIRECTORY"
        sudo tune2fs -m 0.0001 /dev/sdb1
        sudo tune2fs -m 0.0001 /dev/root
+       df -hT
     - name: Checkout
       run: |
     - uses: actions/checkout@main
@@ -67,7 +69,7 @@ jobs:
         sudo timedatectl set-timezone "$TZ"
         sudo mkdir -p /workdir
         sudo chown $USER:$GROUPS /workdir
-        
+        df -hT
     - name: Clone source code
       working-directory: /workdir
       run: |
