@@ -62,7 +62,7 @@ jobs:
         DEBIAN_FRONTEND: noninteractive
       run: |
         wget https://go.dev/dl/go1.22.1.linux-amd64.tar.gz
-        sudo rm -rf /usr/local/go && tar -C /usr/local -xzf go1.22.1.linux-amd64.tar.gz
+        sudo tar -C /usr/local -xzf go1.22.1.linux-amd64.tar.gz
         export PATH=$PATH:/usr/local/go/bin
         go version
         sudo -E apt-get -qq update
@@ -74,7 +74,7 @@ jobs:
         sudo timedatectl set-timezone "$TZ"
         sudo mkdir -p /workdir
         sudo chown $USER:$GROUPS /workdir
-        df -hT
+        df -hT 
     - name: Clone source code
       working-directory: /workdir
       run: |
