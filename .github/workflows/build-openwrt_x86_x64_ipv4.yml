@@ -111,10 +111,10 @@ jobs:
     - name: clean feeds
       run: cd openwrt && ./scripts/feeds clean
     - name: Update feeds
-      run: cd openwrt && ./scripts/feeds update -a && rm -rf feeds/packages/lang/golang && git clone https://github.com/sbwml/packages_lang_golang -b 22.x feeds/packages/lang/golang
+      run: cd openwrt && ./scripts/feeds update -a 
 
     - name: Install feeds
-      run: cd openwrt && ./scripts/feeds install -a
+      run: cd openwrt && ./scripts/feeds install -a && rm -rf feeds/packages/lang/golang && git clone https://github.com/sbwml/packages_lang_golang -b 22.x feeds/packages/lang/golang
 
     - name: Load custom configuration
       run: |
