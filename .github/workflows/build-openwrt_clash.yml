@@ -79,22 +79,25 @@ jobs:
         cd openwrt
         $GITHUB_WORKSPACE/$DIY_P1_SH
 
-#    - name: git clone app
-#      run: |
-#        cd openwrt
-#        chmod -R 777 package
-#        git clone https://github.com/xiaorouji/openwrt-passwall-packages.git;main package/passwall_packages
-#        git clone https://github.com/xiaorouji/openwrt-passwall2 package/passwall2
-#        git clone --depth=1 https://github.com/fw876/helloworld.git package/helloworld
-#        echo 'src-git passwall_packages https://github.com/xiaorouji/openwrt-passwall-packages.git;main" >> feeds.conf.default
-#        echo 'src-git passwall2 https://github.com/xiaorouji/openwrt-passwall2.git;main" >> feeds.conf.default
-#        echo 'src-git helloworld https://github.com/fw876/helloworld.git' >> feeds.conf.default
+    - name: git clone app
+      run: |
+        cd openwrt
+        chmod -R 777 package
+        wget https://github.com/vernesong/OpenClash/archive/master.zip
+        unzip master.zip
+        cp -r OpenClash-master/luci-app-openclash package/
+        echo 'src-git passwall_packages https://github.com/xiaorouji/openwrt-passwall-packages.git;main" >> feeds.conf.default
+        echo 'src-git passwall2 https://github.com/xiaorouji/openwrt-passwall2.git;main" >> feeds.conf.default
+        echo 'src-git helloworld https://github.com/fw876/helloworld.git' >> feeds.conf.default
 #        git clone -b lede --single-branch https://github.com/pymumu/luci-app-smartdns.git package/smartdns/luci-app-smartdns
 #        git clone https://github.com/pymumu/openwrt-smartdns.git package/smartdns/smartdns
 #        echo 'src-git passwall1 https://github.com/xiaorouji/openwrt-passwall.git;packages' >> feeds.conf.default
 #        chmod -R 777 package
 #        git clone https://github.com/hellyouhun/redsocks2 packages/master/net/redsocks2
 #        git clone https://github.com/xiaorouji/openwrt-passwall package/passwall
+#        git clone https://github.com/xiaorouji/openwrt-passwall2 package/passwall2
+#        git clone --depth=1 https://github.com/fw876/helloworld.git package/helloworld
+#        git clone https://github.com/xiaorouji/openwrt-passwall-packages.git;main package/passwall_packages
 #        git clone https://github.com/xiaorouji/openwrt-passwall2 package/passwall2
 #        git clone --depth=1 https://github.com/fw876/helloworld.git package/helloworld
     - name: clean feeds
