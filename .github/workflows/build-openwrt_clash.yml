@@ -79,12 +79,10 @@ jobs:
         cd openwrt
         $GITHUB_WORKSPACE/$DIY_P1_SH
 
-    - name: git clone app
+    - name: git clone app Clash
       run: |
         cd openwrt/package/
-        wget https://github.com/vernesong/OpenClash/archive/master.zip
-        unzip master.zip
-        rm -rf master.zip
+        wget https://github.com/vernesong/OpenClash/archive/master.zip && unzip master.zip && rm -rf master.zip
 #        echo 'src-git passwall_packages https://github.com/xiaorouji/openwrt-passwall-packages.git;main" >> feeds.conf.default
 #        echo 'src-git passwall2 https://github.com/xiaorouji/openwrt-passwall2.git;main" >> feeds.conf.default
 #        echo 'src-git helloworld https://github.com/fw876/helloworld.git' >> feeds.conf.default
