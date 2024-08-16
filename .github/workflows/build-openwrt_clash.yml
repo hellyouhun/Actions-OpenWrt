@@ -23,7 +23,7 @@ env:
   REPO_URL: https://github.com/coolsnowwolf/lede
   REPO_BRANCH: master
   FEEDS_CONF: feeds.conf.default
-  CONFIG_FILE: .configclash 
+  CONFIG_FILE: .configcool0208
   DIY_P1_SH: diy-part1.sh
   DIY_P2_SH: diy-part2.sh
   UPLOAD_BIN_DIR: false
@@ -39,10 +39,15 @@ jobs:
     runs-on: ubuntu-22.04
 
     steps:
-    - name: Checkout
+    - name: Freeing up disk space
       run: |
        sudo rm -rf /usr/share/dotnet
+       sudo rm -rf "/usr/local/share/boost"
        sudo rm -rf "$AGENT_TOOLSDIRECTORY"
+       sudo tune2fs -m 0.0001 /dev/sdb1
+       sudo tune2fs -m 0.0001 /dev/root
+    - name: Checkout
+      run: |
     - uses: actions/checkout@main
     - uses: actions/checkout@v4
     - uses: actions/setup-node@v4
@@ -54,22 +59,21 @@ jobs:
       env:
         DEBIAN_FRONTEND: noninteractive
       run: |
-        sudo rm -rf /etc/apt/sources.list.d/* /usr/share/dotnet /usr/local/lib/android /opt/ghc
         sudo -E apt-get -qq update
-        sudo -E apt-get -qq install ack antlr3 asciidoc autoconf automake autopoint binutils bison build-essential bzip2 ccache cmake cpio curl device-tree-compiler fastjar flex gawk gettext gcc-multilib g++-multilib git gperf haveged help2man intltool libc6-dev-i386 libelf-dev libglib2.0-dev libgmp3-dev libltdl-dev libmpc-dev libmpfr-dev libncurses5-dev libncursesw5-dev libreadline-dev libssl-dev libtool lrzsz mkisofs msmtp nano ninja-build p7zip p7zip-full patch pkgconf python2.7 python3 python3-pyelftools libpython3-dev qemu-utils rsync scons squashfs-tools subversion swig texinfo uglifyjs upx-ucl unzip vim wget xmlto xxd zlib1g-dev
+        sudo -E apt-get -qq install ack antlr3 asciidoc autoconf automake autopoint binutils bison build-essential bzip2 ccache cmake cpio curl device-tree-compiler fastjar flex gawk gettext gcc-multilib g++-multilib git gperf haveged help2man intltool libc6-dev-i386 libelf-dev libglib2.0-dev libgmp3-dev libltdl-dev libmpc-dev libmpfr-dev libncurses5-dev libncursesw5-dev libreadline-dev libssl-dev libtool lrzsz genisoimage msmtp nano ninja-build p7zip p7zip-full patch pkgconf python2.7 python3 python3-pyelftools libpython3-dev python3-setuptools qemu-utils rsync scons squashfs-tools subversion swig texinfo uglifyjs upx-ucl unzip vim wget xmlto xxd zlib1g-dev 
         sudo -E apt-get -qq autoremove --purge
         sudo -E apt-get -qq clean
+        sudo rm -rf /etc/apt/sources.list.d/* /usr/local/lib/android /opt/ghc /usr/share/dotnet /usr/local/graalvm /usr/local/.ghcup /usr/local/share/powershell /usr/local/share/chromium /usr/local/lib/node_modules
         sudo timedatectl set-timezone "$TZ"
         sudo mkdir -p /workdir
         sudo chown $USER:$GROUPS /workdir
-#        sudo -E apt-get -qq install $(curl -fsSL git.io/depends-ubuntu-2004)
+        
     - name: Clone source code
-#      working-directory: /root
       working-directory: /workdir
       run: |
         df -hT $PWD
         git clone $REPO_URL -b $REPO_BRANCH openwrt
-        chmod -R 777 openwrt
+         chmod -R 777 openwrt
         ln -sf /workdir/openwrt $GITHUB_WORKSPACE/openwrt
 
     - name: Load custom feeds
@@ -79,10 +83,17 @@ jobs:
         cd openwrt
         $GITHUB_WORKSPACE/$DIY_P1_SH
 
-    - name: git clone app Clash
+    - name: git clone app
       run: |
-        cd openwrt/package/
-        wget https://github.com/vernesong/OpenClash/archive/master.zip && unzip master.zip && rm -rf master.zip
+        wget https://github.com/vernesong/OpenClash/archive/master.zip
+        unzip master.zip
+        cp -r OpenClash-master/luci-app-openclash openwrt/package
+        rm -rf master.zip
+#        cd openwrt
+#        chmod -R 777 package
+#        git clone https://github.com/xiaorouji/openwrt-passwall-packages.git;main package/passwall_packages
+#        git clone https://github.com/xiaorouji/openwrt-passwall2 package/passwall2
+#        git clone --depth=1 https://github.com/fw876/helloworld.git package/helloworld
 #        echo 'src-git passwall_packages https://github.com/xiaorouji/openwrt-passwall-packages.git;main" >> feeds.conf.default
 #        echo 'src-git passwall2 https://github.com/xiaorouji/openwrt-passwall2.git;main" >> feeds.conf.default
 #        echo 'src-git helloworld https://github.com/fw876/helloworld.git' >> feeds.conf.default
@@ -92,9 +103,6 @@ jobs:
 #        chmod -R 777 package
 #        git clone https://github.com/hellyouhun/redsocks2 packages/master/net/redsocks2
 #        git clone https://github.com/xiaorouji/openwrt-passwall package/passwall
-#        git clone https://github.com/xiaorouji/openwrt-passwall2 package/passwall2
-#        git clone --depth=1 https://github.com/fw876/helloworld.git package/helloworld
-#        git clone https://github.com/xiaorouji/openwrt-passwall-packages.git;main package/passwall_packages
 #        git clone https://github.com/xiaorouji/openwrt-passwall2 package/passwall2
 #        git clone --depth=1 https://github.com/fw876/helloworld.git package/helloworld
     - name: clean feeds
@@ -114,7 +122,7 @@ jobs:
         $GITHUB_WORKSPACE/$DIY_P2_SH
 
     - name: SSH connection to Actions
-      uses: P3TERX/ssh2actions@v1.0.0
+      uses: P3TERX/ssh2actions@main
       if: (github.event.inputs.ssh == 'true' && github.event.inputs.ssh  != 'false') || contains(github.event.action, 'ssh')
       env:
         TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
