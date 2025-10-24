@@ -74,8 +74,8 @@ jobs:
         sudo -E apt-get -qq clean
         sudo rm -rf /etc/apt/sources.list.d/* /usr/local/lib/android /opt/ghc /usr/share/dotnet /usr/local/graalvm /usr/local/.ghcup /usr/local/share/powershell /usr/local/share/chromium /usr/local/lib/node_modules
         sudo timedatectl set-timezone "$TZ"
-        sudo mkdir -p /workdir
-        sudo chown $USER:$GROUPS /workdir
+
+        
     - name: Create simulated physical disk
       run: |
         mnt_size=$(expr $(df -h /mnt | tail -1 | awk '{print $4}' | sed 's/[[:alpha:]]//g' | sed 's/\..*//') - 1)
@@ -92,7 +92,8 @@ jobs:
         sudo mkdir -p /workdir
         sudo mount /dev/github/runner /workdir
         sudo chown -R runner.runner /workdir
-        df -Th    
+        sudo chown $USER:$GROUPS /workdir
+        df -Th     
     - name: Clone source code
       working-directory: /workdir
       run: |
