@@ -4772,7 +4772,7 @@ CONFIG_PACKAGE_libreadline=y
 # CONFIG_PACKAGE_libredblack is not set
 # CONFIG_PACKAGE_librouteros is not set
 # CONFIG_PACKAGE_libroxml is not set
-# CONFIG_PACKAGE_librrd1 is not set
+CONFIG_PACKAGE_librrd1=y
 # CONFIG_PACKAGE_librtlsdr is not set
 # CONFIG_PACKAGE_libruby is not set
 # CONFIG_PACKAGE_libsamplerate is not set
@@ -5206,7 +5206,7 @@ CONFIG_PACKAGE_luci-app-rclone_INCLUDE_rclone-ng=y
 # CONFIG_PACKAGE_luci-app-scutclient is not set
 # CONFIG_PACKAGE_luci-app-ser2net is not set
 # CONFIG_PACKAGE_luci-app-siitwizard is not set
-# CONFIG_PACKAGE_luci-app-smartdns is not set
+CONFIG_PACKAGE_luci-app-smartdns=y
 # CONFIG_PACKAGE_luci-app-sms-tool-js is not set
 # CONFIG_PACKAGE_luci-app-snmpd is not set
 # CONFIG_PACKAGE_luci-app-softether is not set
@@ -5243,7 +5243,7 @@ CONFIG_PACKAGE_luci-app-ssr-plus_INCLUDE_Shadowsocks_Simple_Obfs=y
 CONFIG_PACKAGE_luci-app-ssr-plus_INCLUDE_ShadowsocksR_Libev_Client=y
 CONFIG_PACKAGE_luci-app-ssr-plus_INCLUDE_ShadowsocksR_Libev_Server=y
 # CONFIG_PACKAGE_luci-app-ssr-plus_INCLUDE_Trojan is not set
-# CONFIG_PACKAGE_luci-app-statistics is not set
+CONFIG_PACKAGE_luci-app-statistics=y
 # CONFIG_PACKAGE_luci-app-strongswan-swanctl is not set
 # CONFIG_PACKAGE_luci-app-syncdial is not set
 # CONFIG_PACKAGE_luci-app-syncthing is not set
@@ -5622,6 +5622,40 @@ CONFIG_PACKAGE_luci-i18n-pbr-zh-cn=y
 CONFIG_PACKAGE_luci-i18n-pppoe-relay-zh-cn=y
 CONFIG_PACKAGE_luci-i18n-pppoe-server-zh-cn=y
 CONFIG_PACKAGE_luci-i18n-rclone-zh-cn=y
+# CONFIG_PACKAGE_luci-i18n-smartdns-ar is not set
+# CONFIG_PACKAGE_luci-i18n-smartdns-bg is not set
+# CONFIG_PACKAGE_luci-i18n-smartdns-bn is not set
+# CONFIG_PACKAGE_luci-i18n-smartdns-ca is not set
+# CONFIG_PACKAGE_luci-i18n-smartdns-cs is not set
+# CONFIG_PACKAGE_luci-i18n-smartdns-da is not set
+# CONFIG_PACKAGE_luci-i18n-smartdns-de is not set
+# CONFIG_PACKAGE_luci-i18n-smartdns-el is not set
+# CONFIG_PACKAGE_luci-i18n-smartdns-es is not set
+# CONFIG_PACKAGE_luci-i18n-smartdns-fi is not set
+# CONFIG_PACKAGE_luci-i18n-smartdns-fr is not set
+# CONFIG_PACKAGE_luci-i18n-smartdns-he is not set
+# CONFIG_PACKAGE_luci-i18n-smartdns-hi is not set
+# CONFIG_PACKAGE_luci-i18n-smartdns-hu is not set
+# CONFIG_PACKAGE_luci-i18n-smartdns-it is not set
+# CONFIG_PACKAGE_luci-i18n-smartdns-ja is not set
+# CONFIG_PACKAGE_luci-i18n-smartdns-ko is not set
+# CONFIG_PACKAGE_luci-i18n-smartdns-lt is not set
+# CONFIG_PACKAGE_luci-i18n-smartdns-mr is not set
+# CONFIG_PACKAGE_luci-i18n-smartdns-ms is not set
+# CONFIG_PACKAGE_luci-i18n-smartdns-nl is not set
+# CONFIG_PACKAGE_luci-i18n-smartdns-no is not set
+# CONFIG_PACKAGE_luci-i18n-smartdns-pl is not set
+# CONFIG_PACKAGE_luci-i18n-smartdns-pt is not set
+# CONFIG_PACKAGE_luci-i18n-smartdns-pt-br is not set
+# CONFIG_PACKAGE_luci-i18n-smartdns-ro is not set
+# CONFIG_PACKAGE_luci-i18n-smartdns-ru is not set
+# CONFIG_PACKAGE_luci-i18n-smartdns-sk is not set
+# CONFIG_PACKAGE_luci-i18n-smartdns-sv is not set
+# CONFIG_PACKAGE_luci-i18n-smartdns-tr is not set
+# CONFIG_PACKAGE_luci-i18n-smartdns-uk is not set
+# CONFIG_PACKAGE_luci-i18n-smartdns-vi is not set
+CONFIG_PACKAGE_luci-i18n-smartdns-zh-cn=y
+# CONFIG_PACKAGE_luci-i18n-smartdns-zh-tw is not set
 # CONFIG_PACKAGE_luci-i18n-sshtunnel-ar is not set
 # CONFIG_PACKAGE_luci-i18n-sshtunnel-bg is not set
 # CONFIG_PACKAGE_luci-i18n-sshtunnel-bn is not set
@@ -5657,6 +5691,42 @@ CONFIG_PACKAGE_luci-i18n-rclone-zh-cn=y
 CONFIG_PACKAGE_luci-i18n-sshtunnel-zh-cn=y
 # CONFIG_PACKAGE_luci-i18n-sshtunnel-zh-tw is not set
 CONFIG_PACKAGE_luci-i18n-ssr-plus-zh-cn=y
+# CONFIG_PACKAGE_luci-i18n-statistics-ar is not set
+# CONFIG_PACKAGE_luci-i18n-statistics-bg is not set
+# CONFIG_PACKAGE_luci-i18n-statistics-bn is not set
+# CONFIG_PACKAGE_luci-i18n-statistics-ca is not set
+# CONFIG_PACKAGE_luci-i18n-statistics-cs is not set
+# CONFIG_PACKAGE_luci-i18n-statistics-da is not set
+# CONFIG_PACKAGE_luci-i18n-statistics-de is not set
+# CONFIG_PACKAGE_luci-i18n-statistics-el is not set
+# CONFIG_PACKAGE_luci-i18n-statistics-es is not set
+# CONFIG_PACKAGE_luci-i18n-statistics-fa is not set
+# CONFIG_PACKAGE_luci-i18n-statistics-fi is not set
+# CONFIG_PACKAGE_luci-i18n-statistics-fr is not set
+# CONFIG_PACKAGE_luci-i18n-statistics-he is not set
+# CONFIG_PACKAGE_luci-i18n-statistics-hi is not set
+# CONFIG_PACKAGE_luci-i18n-statistics-hu is not set
+# CONFIG_PACKAGE_luci-i18n-statistics-it is not set
+# CONFIG_PACKAGE_luci-i18n-statistics-ja is not set
+# CONFIG_PACKAGE_luci-i18n-statistics-ko is not set
+# CONFIG_PACKAGE_luci-i18n-statistics-lt is not set
+# CONFIG_PACKAGE_luci-i18n-statistics-mr is not set
+# CONFIG_PACKAGE_luci-i18n-statistics-ms is not set
+# CONFIG_PACKAGE_luci-i18n-statistics-nl is not set
+# CONFIG_PACKAGE_luci-i18n-statistics-no is not set
+# CONFIG_PACKAGE_luci-i18n-statistics-pl is not set
+# CONFIG_PACKAGE_luci-i18n-statistics-pt is not set
+# CONFIG_PACKAGE_luci-i18n-statistics-pt-br is not set
+# CONFIG_PACKAGE_luci-i18n-statistics-ro is not set
+# CONFIG_PACKAGE_luci-i18n-statistics-ru is not set
+# CONFIG_PACKAGE_luci-i18n-statistics-sk is not set
+# CONFIG_PACKAGE_luci-i18n-statistics-sv is not set
+# CONFIG_PACKAGE_luci-i18n-statistics-tr is not set
+# CONFIG_PACKAGE_luci-i18n-statistics-uk is not set
+# CONFIG_PACKAGE_luci-i18n-statistics-vi is not set
+# CONFIG_PACKAGE_luci-i18n-statistics-yua is not set
+CONFIG_PACKAGE_luci-i18n-statistics-zh-cn=y
+# CONFIG_PACKAGE_luci-i18n-statistics-zh-tw is not set
 CONFIG_PACKAGE_luci-i18n-turboacc-zh-cn=y
 # CONFIG_PACKAGE_luci-i18n-upnp-ar is not set
 # CONFIG_PACKAGE_luci-i18n-upnp-bg is not set
@@ -7055,7 +7125,7 @@ CONFIG_RPCBIND_RMTCALLS=y
 CONFIG_PACKAGE_simple-obfs-client=y
 # CONFIG_PACKAGE_simple-obfs-server is not set
 # CONFIG_PACKAGE_slirp4netns is not set
-# CONFIG_PACKAGE_smartdns is not set
+CONFIG_PACKAGE_smartdns=y
 # CONFIG_PACKAGE_smbinfo is not set
 # CONFIG_PACKAGE_snmp-mibs is not set
 # CONFIG_PACKAGE_snmp-utils is not set
@@ -7221,7 +7291,7 @@ CONFIG_PACKAGE_unzip=y
 # CONFIG_PACKAGE_pgsql-cli-extra is not set
 # CONFIG_PACKAGE_pgsql-server is not set
 # CONFIG_PACKAGE_rrdcgi1 is not set
-# CONFIG_PACKAGE_rrdtool1 is not set
+CONFIG_PACKAGE_rrdtool1=y
 # CONFIG_PACKAGE_sqlite3-cli is not set
 # CONFIG_PACKAGE_unixodbc-tools is not set
 # end of Database
@@ -7554,7 +7624,82 @@ CONFIG_PACKAGE_bc=y
 # CONFIG_PACKAGE_cni-plugins is not set
 # CONFIG_PACKAGE_cni-plugins-nft is not set
 # CONFIG_PACKAGE_coap-client is not set
-# CONFIG_PACKAGE_collectd is not set
+CONFIG_PACKAGE_collectd=y
+# CONFIG_PACKAGE_COLLECTD_ENCRYPTED_NETWORK is not set
+# CONFIG_PACKAGE_COLLECTD_DEBUG_OUTPUT_ENABLE is not set
+# CONFIG_PACKAGE_collectd-mod-apache is not set
+# CONFIG_PACKAGE_collectd-mod-apcups is not set
+# CONFIG_PACKAGE_collectd-mod-ascent is not set
+# CONFIG_PACKAGE_collectd-mod-bind is not set
+# CONFIG_PACKAGE_collectd-mod-chrony is not set
+# CONFIG_PACKAGE_collectd-mod-conntrack is not set
+# CONFIG_PACKAGE_collectd-mod-contextswitch is not set
+CONFIG_PACKAGE_collectd-mod-cpu=y
+# CONFIG_PACKAGE_collectd-mod-cpufreq is not set
+# CONFIG_PACKAGE_collectd-mod-csv is not set
+# CONFIG_PACKAGE_collectd-mod-curl is not set
+# CONFIG_PACKAGE_collectd-mod-df is not set
+# CONFIG_PACKAGE_collectd-mod-dhcpleases is not set
+# CONFIG_PACKAGE_collectd-mod-disk is not set
+# CONFIG_PACKAGE_collectd-mod-dns is not set
+# CONFIG_PACKAGE_collectd-mod-email is not set
+# CONFIG_PACKAGE_collectd-mod-entropy is not set
+# CONFIG_PACKAGE_collectd-mod-ethstat is not set
+# CONFIG_PACKAGE_collectd-mod-exec is not set
+# CONFIG_PACKAGE_collectd-mod-filecount is not set
+# CONFIG_PACKAGE_collectd-mod-fscache is not set
+CONFIG_PACKAGE_collectd-mod-interface=y
+# CONFIG_PACKAGE_collectd-mod-ipstatistics is not set
+# CONFIG_PACKAGE_collectd-mod-iptables is not set
+# CONFIG_PACKAGE_collectd-mod-irq is not set
+CONFIG_PACKAGE_collectd-mod-iwinfo=y
+CONFIG_PACKAGE_collectd-mod-load=y
+# CONFIG_PACKAGE_collectd-mod-logfile is not set
+# CONFIG_PACKAGE_collectd-mod-lua is not set
+# CONFIG_PACKAGE_collectd-mod-match-empty-counter is not set
+# CONFIG_PACKAGE_collectd-mod-match-hashed is not set
+# CONFIG_PACKAGE_collectd-mod-match-regex is not set
+# CONFIG_PACKAGE_collectd-mod-match-timediff is not set
+# CONFIG_PACKAGE_collectd-mod-match-value is not set
+CONFIG_PACKAGE_collectd-mod-memory=y
+# CONFIG_PACKAGE_collectd-mod-modbus is not set
+# CONFIG_PACKAGE_collectd-mod-mqtt is not set
+# CONFIG_PACKAGE_collectd-mod-mysql is not set
+# CONFIG_PACKAGE_collectd-mod-netlink is not set
+CONFIG_PACKAGE_collectd-mod-network=y
+# CONFIG_PACKAGE_collectd-mod-nginx is not set
+# CONFIG_PACKAGE_collectd-mod-ntpd is not set
+# CONFIG_PACKAGE_collectd-mod-olsrd is not set
+# CONFIG_PACKAGE_collectd-mod-openvpn is not set
+# CONFIG_PACKAGE_collectd-mod-ping is not set
+# CONFIG_PACKAGE_collectd-mod-postgresql is not set
+# CONFIG_PACKAGE_collectd-mod-powerdns is not set
+# CONFIG_PACKAGE_collectd-mod-processes is not set
+# CONFIG_PACKAGE_collectd-mod-protocols is not set
+# CONFIG_PACKAGE_collectd-mod-routeros is not set
+CONFIG_PACKAGE_collectd-mod-rrdtool=y
+# CONFIG_PACKAGE_collectd-mod-sensors is not set
+# CONFIG_PACKAGE_collectd-mod-smart is not set
+# CONFIG_PACKAGE_collectd-mod-snmp is not set
+# CONFIG_PACKAGE_collectd-mod-snmp6 is not set
+# CONFIG_PACKAGE_collectd-mod-sqm is not set
+# CONFIG_PACKAGE_collectd-mod-swap is not set
+# CONFIG_PACKAGE_collectd-mod-syslog is not set
+# CONFIG_PACKAGE_collectd-mod-table is not set
+# CONFIG_PACKAGE_collectd-mod-tail is not set
+# CONFIG_PACKAGE_collectd-mod-tail-csv is not set
+# CONFIG_PACKAGE_collectd-mod-tcpconns is not set
+# CONFIG_PACKAGE_collectd-mod-teamspeak2 is not set
+# CONFIG_PACKAGE_collectd-mod-ted is not set
+# CONFIG_PACKAGE_collectd-mod-thermal is not set
+# CONFIG_PACKAGE_collectd-mod-threshold is not set
+# CONFIG_PACKAGE_collectd-mod-unixsock is not set
+# CONFIG_PACKAGE_collectd-mod-uptime is not set
+# CONFIG_PACKAGE_collectd-mod-users is not set
+# CONFIG_PACKAGE_collectd-mod-vmem is not set
+# CONFIG_PACKAGE_collectd-mod-wireless is not set
+# CONFIG_PACKAGE_collectd-mod-write-graphite is not set
+# CONFIG_PACKAGE_collectd-mod-write-http is not set
 # CONFIG_PACKAGE_conmon is not set
 # CONFIG_PACKAGE_containerd is not set
 CONFIG_PACKAGE_coremark=y
