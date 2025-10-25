@@ -8,7 +8,7 @@
 # Description: Build OpenWrt using GitHub Actions
 #
 
-name: coolede-ARM配置24
+name: coolede-ARM配置23
 
 on:
   repository_dispatch:
@@ -23,7 +23,7 @@ env:
   REPO_URL: https://github.com/coolsnowwolf/lede
   REPO_BRANCH: master
   FEEDS_CONF: 23feeds.conf.default
-  CONFIG_FILE: .configarm24
+  CONFIG_FILE: .configarm23
   DIY_P1_SH: 23diy-part1.sh
   DIY_P2_SH: arm-diy-part2.sh
   UPLOAD_BIN_DIR: false
