@@ -92,6 +92,7 @@ jobs:
         sudo mount /dev/github/runner /workdir
         sudo chown -R runner.runner /workdir
         sudo chown $USER:$GROUPS /workdir
+        chmod -R 777 workdir
         df -Th  
     - name: Clone source code
       working-directory: /workdir
