@@ -89,7 +89,6 @@ jobs:
         sudo vgcreate github /dev/loop6 /dev/loop7
         sudo lvcreate -n runner -l 100%FREE github
         sudo mkdir -p workdir
-        chmod -R 777 workdir
         sudo mkfs.xfs /dev/github/runner
         hmod -R 777 /dev/github/runner
         sudo mount /dev/github/runner /workdir
