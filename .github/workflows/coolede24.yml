@@ -88,9 +88,8 @@ jobs:
         sudo pvcreate /dev/loop7
         sudo vgcreate github /dev/loop6 /dev/loop7
         sudo lvcreate -n runner -l 100%FREE github
-        sudo mkdir -p /workdir
         sudo mkfs.xfs /dev/github/runner
-        hmod -R 777 /dev/github/runner
+        sudo mkdir -p /workdir
         sudo mount /dev/github/runner /workdir
         sudo chown -R runner.runner /workdir
         sudo chown $USER:$GROUPS /workdir
