@@ -7,7 +7,7 @@
 # https://github.com/P3TERX/Actions-OpenWrt
 # Description: Build OpenWrt using GitHub Actions
 #
-name: coolede-23
+name: coolede-24
 
 on:
   repository_dispatch:
