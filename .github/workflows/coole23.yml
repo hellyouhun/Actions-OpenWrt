@@ -48,10 +48,10 @@ jobs:
     - name: Checkout
       run: |
     - uses: actions/checkout@main
-    - uses: actions/checkout@v4
-    - uses: actions/setup-node@v4
+    - uses: actions/checkout@v5
+    - uses: actions/setup-node@v6
       with:
-        node-version: '20'
+        node-version: '24'
     - run: npm install -g bats
     - run: bats -v
     - name: Initialization environment
