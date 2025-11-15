@@ -47,7 +47,7 @@ jobs:
        sudo tune2fs -m 0.0001 /dev/root
     - name: Checkout
       run: |
-    - uses: actions/checkout@main
+#    - uses: actions/checkout@main
     - uses: actions/checkout@v5
     - uses: actions/setup-node@v6
       with:
