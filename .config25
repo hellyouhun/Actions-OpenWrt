@@ -1779,7 +1779,7 @@ CONFIG_ZABBIX_POSTGRESQL=y
 # openwisp
 #
 # CONFIG_PACKAGE_netjson-monitoring is not set
-# CONFIG_PACKAGE_openwisp-config is not set
+CONFIG_PACKAGE_openwisp-config=y
 # CONFIG_PACKAGE_openwisp-monitoring is not set
 # end of openwisp
 
@@ -3306,7 +3306,7 @@ CONFIG_PACKAGE_lua-neturl=y
 # CONFIG_PACKAGE_luac5.3 is not set
 # CONFIG_PACKAGE_luac5.4 is not set
 # CONFIG_PACKAGE_luaexpat is not set
-# CONFIG_PACKAGE_luafilesystem is not set
+CONFIG_PACKAGE_luafilesystem=y
 # CONFIG_PACKAGE_luajit is not set
 # CONFIG_PACKAGE_lualanes is not set
 # CONFIG_PACKAGE_luaossl is not set
@@ -3719,7 +3719,7 @@ CONFIG_PACKAGE_ucode-mod-uci=y
 # CONFIG_PACKAGE_libacl is not set
 # CONFIG_PACKAGE_libattr is not set
 # CONFIG_PACKAGE_libfuse is not set
-CONFIG_PACKAGE_libfuse3=y
+# CONFIG_PACKAGE_libfuse3 is not set
 # CONFIG_PACKAGE_libow is not set
 # CONFIG_PACKAGE_libow-capi is not set
 CONFIG_PACKAGE_libsysfs=y
@@ -5117,7 +5117,7 @@ CONFIG_PACKAGE_ipset=y
 # CONFIG_PACKAGE_luci-app-openlist is not set
 CONFIG_PACKAGE_luci-app-openvpn=y
 CONFIG_PACKAGE_luci-app-openvpn-server=y
-# CONFIG_PACKAGE_luci-app-openwisp is not set
+CONFIG_PACKAGE_luci-app-openwisp=y
 CONFIG_PACKAGE_luci-app-opkg=y
 # CONFIG_PACKAGE_luci-app-oscam is not set
 # CONFIG_PACKAGE_luci-app-p910nd is not set
@@ -5175,7 +5175,7 @@ CONFIG_PACKAGE_luci-app-passwall2_INCLUDE_V2ray_Plugin=y
 
 CONFIG_PACKAGE_luci-app-pbr=y
 # CONFIG_PACKAGE_luci-app-pgyvpn is not set
-CONFIG_PACKAGE_luci-app-phtunnel=y
+# CONFIG_PACKAGE_luci-app-phtunnel is not set
 # CONFIG_PACKAGE_luci-app-polipo is not set
 # CONFIG_PACKAGE_luci-app-pppwn is not set
 # CONFIG_PACKAGE_luci-app-privoxy is not set
@@ -5185,7 +5185,7 @@ CONFIG_PACKAGE_luci-app-phtunnel=y
 # CONFIG_PACKAGE_luci-app-radicale is not set
 # CONFIG_PACKAGE_luci-app-radicale2 is not set
 CONFIG_PACKAGE_luci-app-ramfree=y
-CONFIG_PACKAGE_luci-app-rclone=y
+# CONFIG_PACKAGE_luci-app-rclone is not set
 CONFIG_PACKAGE_luci-app-rclone_INCLUDE_rclone-webui=y
 CONFIG_PACKAGE_luci-app-rclone_INCLUDE_rclone-ng=y
 # CONFIG_PACKAGE_luci-app-rp-pppoe-server is not set
@@ -5285,7 +5285,7 @@ CONFIG_PACKAGE_luci-app-zerotier=y
 #
 # CONFIG_PACKAGE_luci-theme-argon is not set
 CONFIG_PACKAGE_luci-theme-bootstrap=y
-# CONFIG_PACKAGE_luci-theme-design is not set
+CONFIG_PACKAGE_luci-theme-design=y
 CONFIG_PACKAGE_luci-theme-material=y
 # CONFIG_PACKAGE_luci-theme-openwrt is not set
 # CONFIG_PACKAGE_luci-theme-openwrt-2020 is not set
@@ -5335,7 +5335,7 @@ CONFIG_PACKAGE_luci-lib-ip=y
 CONFIG_PACKAGE_luci-lib-ipkg=y
 # CONFIG_PACKAGE_luci-lib-iptparser is not set
 # CONFIG_PACKAGE_luci-lib-jquery-1-4 is not set
-CONFIG_PACKAGE_luci-lib-json=y
+# CONFIG_PACKAGE_luci-lib-json is not set
 CONFIG_PACKAGE_luci-lib-jsonc=y
 CONFIG_PACKAGE_luci-lib-nixio=y
 # CONFIG_PACKAGE_luci-lib-px5g is not set
@@ -5553,6 +5553,8 @@ CONFIG_PACKAGE_luci-i18n-openvpn-server-zh-cn=y
 # CONFIG_PACKAGE_luci-i18n-openvpn-vi is not set
 CONFIG_PACKAGE_luci-i18n-openvpn-zh-cn=y
 # CONFIG_PACKAGE_luci-i18n-openvpn-zh-tw is not set
+# CONFIG_PACKAGE_luci-i18n-openwisp-es is not set
+# CONFIG_PACKAGE_luci-i18n-openwisp-lt is not set
 # CONFIG_PACKAGE_luci-i18n-opkg-ar is not set
 # CONFIG_PACKAGE_luci-i18n-opkg-bg is not set
 # CONFIG_PACKAGE_luci-i18n-opkg-bn is not set
@@ -5622,7 +5624,6 @@ CONFIG_PACKAGE_luci-i18n-passwall2-zh-cn=y
 CONFIG_PACKAGE_luci-i18n-pbr-zh-cn=y
 # CONFIG_PACKAGE_luci-i18n-pbr-zh-tw is not set
 CONFIG_PACKAGE_luci-i18n-ramfree-zh-cn=y
-CONFIG_PACKAGE_luci-i18n-rclone-zh-cn=y
 # CONFIG_PACKAGE_luci-i18n-smartdns-de is not set
 # CONFIG_PACKAGE_luci-i18n-smartdns-es is not set
 # CONFIG_PACKAGE_luci-i18n-smartdns-lt is not set
@@ -5893,8 +5894,8 @@ CONFIG_PACKAGE_luci-i18n-zerotier-zh-cn=y
 #
 # Cloud Manager
 #
-CONFIG_PACKAGE_rclone-ng=y
-CONFIG_PACKAGE_rclone-webui-react=y
+# CONFIG_PACKAGE_rclone-ng is not set
+# CONFIG_PACKAGE_rclone-webui-react is not set
 # end of Cloud Manager
 
 #
@@ -5927,8 +5928,8 @@ CONFIG_PACKAGE_curl=y
 # CONFIG_PACKAGE_gowebdav is not set
 # CONFIG_PACKAGE_lftp is not set
 # CONFIG_PACKAGE_ps3netsrv is not set
-CONFIG_PACKAGE_rclone=y
-CONFIG_PACKAGE_rclone-config=y
+# CONFIG_PACKAGE_rclone is not set
+# CONFIG_PACKAGE_rclone-config is not set
 # CONFIG_PACKAGE_rosy-file-server is not set
 # CONFIG_PACKAGE_rsync is not set
 # CONFIG_PACKAGE_rsyncd is not set
@@ -6366,8 +6367,8 @@ CONFIG_PACKAGE_pbr=y
 #
 # CONFIG_PACKAGE_autossh is not set
 CONFIG_PACKAGE_openssh-client=y
-# CONFIG_PACKAGE_openssh-client-utils is not set
-# CONFIG_PACKAGE_openssh-keygen is not set
+CONFIG_PACKAGE_openssh-client-utils=y
+CONFIG_PACKAGE_openssh-keygen=y
 # CONFIG_PACKAGE_openssh-moduli is not set
 # CONFIG_PACKAGE_openssh-server is not set
 # CONFIG_PACKAGE_openssh-server-pam is not set
@@ -6711,7 +6712,7 @@ CONFIG_PACKAGE_microsocks=y
 # CONFIG_PACKAGE_nginx-ssl-util is not set
 # CONFIG_PACKAGE_nginx-ssl-util-nopcre is not set
 # CONFIG_PACKAGE_ngrokc is not set
-CONFIG_PACKAGE_phtunnel=y
+# CONFIG_PACKAGE_phtunnel is not set
 # CONFIG_PACKAGE_polipo is not set
 # CONFIG_PACKAGE_privoxy is not set
 # CONFIG_PACKAGE_radicale is not set
@@ -7345,7 +7346,7 @@ CONFIG_PACKAGE_e2fsprogs=y
 # CONFIG_PACKAGE_filefrag is not set
 # CONFIG_PACKAGE_fstrim is not set
 # CONFIG_PACKAGE_fuse-utils is not set
-CONFIG_PACKAGE_fuse3-utils=y
+# CONFIG_PACKAGE_fuse3-utils is not set
 # CONFIG_PACKAGE_hfsfsck is not set
 # CONFIG_PACKAGE_lsattr is not set
 CONFIG_PACKAGE_mkf2fs=y
