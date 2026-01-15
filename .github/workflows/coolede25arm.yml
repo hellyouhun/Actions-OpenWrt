@@ -134,9 +134,8 @@ jobs:
 
     - name: git openwrt luci
       run: |
-        sudo -E rm -rf /feeds/luci/applications/luci-app-sshtunnel
         git clone https://github.com/openwrt/luci openwrtluci
-        sudo -E cp -r /workdir/openwrt/openwrtluci/applications/luci-app-sshtunnel /workdir/openwrt/feeds/luci/applications/
+        sudo -E cp -r /dev/github/runner/openwrt/openwrtluci/applications/luci-app-sshtunnel /dev/github/runner/openwrt/feeds/luci/applications/
         sudo -E rm -rf openwrtluci
 
     - name: Install feeds
