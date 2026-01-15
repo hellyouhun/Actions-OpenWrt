@@ -132,8 +132,17 @@ jobs:
     - name: Update feeds
       run: cd openwrt && ./scripts/feeds update -a
 
+    - name: git openwrt luci
+      run: |
+        sudo -E rm -rf /feeds/luci/applications/luci-app-sshtunnel
+        git clone https://github.com/openwrt/luci openwrtluci
+        sudo -E cp -r /openwrtluci/applications/luci-app-sshtunnel /feeds/luci/applications/
+        sudo -E rm -rf openwrtluci
+
     - name: Install feeds
       run: cd openwrt && ./scripts/feeds install -a
+      
+    
 
     - name: Load custom configuration
       run: |
