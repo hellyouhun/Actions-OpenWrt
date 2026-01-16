@@ -1,17 +1,17 @@
-# This is free software, licensed under the MIT License.
-# See /LICENSE for more information.
+# 本软件基于 MIT 许可证开源。
+# 详情见 /LICENSE
 #
-# github.com
-# Description: Build OpenWrt using GitHub Actions
+# 核心框架基于 P3TERX/Actions-OpenWrt
+# 描述: 使用 GitHub Actions 编译 OpenWrt (2026 优化版)
 #
-name: coolede-25-2
+name: coolede-25-Optimized-2026
 
 on:
   repository_dispatch:
   workflow_dispatch:
     inputs:
       ssh:
-        description: 'SSH connection to Actions'
+        description: '是否开启 SSH 远程调试'
         required: false
         default: 'false'
 
@@ -24,18 +24,22 @@ env:
   DIY_P2_SH: 25diy-part2.sh
   UPLOAD_BIN_DIR: false
   UPLOAD_FIRMWARE: true
-  UPLOAD_RELEASE: false
+  UPLOAD_RELEASE: true
   TZ: Asia/Shanghai
 
 jobs: 
   build:
     runs-on: ubuntu-22.04
+    # 在 2026 年环境，必须显式声明权限以允许删除 Workflow 和上传 Release
+    permissions:
+      actions: write
+      contents: write
 
     steps:
-    - name: Checkout
+    - name: 检查项目源码
       uses: actions/checkout@v4
 
-    - name: Initialization environment
+    - name: 初始化编译环境
       env:
         DEBIAN_FRONTEND: noninteractive
       run: |
@@ -48,7 +52,7 @@ jobs:
         sudo mkdir -p /workdir
         sudo chown $USER:$GROUPS /workdir
 
-    - name: Create simulated physical disk
+    - name: 构建虚拟磁盘 (LVM 扩容)
       run: |
         mnt_size=$(expr $(df -h /mnt | tail -1 | awk '{print $4}' | sed 's/[[:alpha:]]//g' | sed 's/\..*//') - 1)
         root_size=$(expr $(df -h / | tail -1 | awk '{print $4}' | sed 's/[[:alpha:]]//g' | sed 's/\..*//') - 4)
@@ -62,86 +66,77 @@ jobs:
         sudo mkfs.xfs /dev/github/runner
         sudo mount /dev/github/runner /workdir
         sudo chown -R $USER:$GROUPS /workdir
-        df -Th  
 
-    - name: Clone source code
+    - name: 下载源码
       working-directory: /workdir
       run: |
-        git clone $REPO_URL -b $REPO_BRANCH openwrt
+        # 使用变量语法确保 URL 解析绝对正确，解决之前遇到的仓库不存在错误
+        git clone --depth 1 ${{ env.REPO_URL }} -b ${{ env.REPO_BRANCH }} openwrt
         ln -sf /workdir/openwrt $GITHUB_WORKSPACE/openwrt
 
-    - name: Load custom feeds
+    - name: 加载自定义 Feeds (DIY-P1)
       run: |
-        [ -e $FEEDS_CONF ] && mv $FEEDS_CONF openwrt/feeds.conf.default
-        chmod +x $DIY_P1_SH
+        [ -e ${{ env.FEEDS_CONF }} ] && mv ${{ env.FEEDS_CONF }} openwrt/feeds.conf.default
+        chmod +x ${{ env.DIY_P1_SH }}
         cd openwrt
-        $GITHUB_WORKSPACE/$DIY_P1_SH
+        $GITHUB_WORKSPACE/${{ env.DIY_P1_SH }}
 
-    - name: Update feeds
-      run: cd openwrt && ./scripts/feeds update -a
+    - name: 更新 Feeds 源
+      run: |
+        cd openwrt
+        ./scripts/feeds update -a
 
-    - name: git openwrt luci
+    - name: 克隆官方 Luci 倉庫 (引入 SSHTunnel 并修复 OpenSSH 冲突)
       run: |
         # 1. 克隆官方 Luci 倉庫
-        git clone --depth=1 https://github.com/openwrt/luci openwrtluci
-        #git clone --depth=1 https://github.com/openwrt/packages openpackages
+        git clone --depth=1 https://github.com/openwrt/luci tmp_luci
+        git clone --depth=1 https://github.com/openwrt/packages tmp_packages
         # 2. 確保目標目錄存在（feeds/luci 路徑是在 openwrt 根目錄下）
         # 注意：如果 feeds 裡沒有這個目錄，說明 update 沒成功或該類別不存在
         #mkdir -p openwrt/feeds/luci/applications/luci-app-sshtunnel
         # 3. 拷貝插件代碼
-        cp -rf openwrtluci/applications/luci-app-sshtunnel/* openwrt/feeds/luci/applications/luci-app-sshtunnel/
-        #cp -rf openpackages/net/openssh/* openwrt/feeds/packages/net/openssh/
+        cp -rf tmp_luci/applications/luci-app-sshtunnel/* openwrt/feeds/luci/applications/luci-app-sshtunnel/
+        cp -rf tmp_packages/net/openssh/* openwrt/feeds/packages/net/openssh/
         # 4. 清理臨時倉庫
-        rm -rf openwrtluci
-        #rm -rf openpackages
+        rm -rf tmp_luci
+        rm -rf tmp_packages
 
-    - name: Install feeds
-      run: cd openwrt && ./scripts/feeds install -a
+    - name: 安装 Feeds 索引
+      run: |
+        cd openwrt
+        ./scripts/feeds install -a
 
-    - name: Load custom configuration
+    - name: 加载自定义配置 (DIY-P2)
       run: |
         [ -e files ] && mv files openwrt/files
-        [ -e $CONFIG_FILE ] && mv $CONFIG_FILE openwrt/.config
-        chmod +x $DIY_P2_SH
+        [ -e ${{ env.CONFIG_FILE }} ] && mv ${{ env.CONFIG_FILE }} openwrt/.config
+        chmod +x ${{ env.DIY_P2_SH }}
         cd openwrt
-        $GITHUB_WORKSPACE/$DIY_P2_SH
+        $GITHUB_WORKSPACE/${{ env.DIY_P2_SH }}
+        # 自动补全因插件依赖而缺失的基础包配置
+        make defconfig
 
-    - name: SSH connection to Actions
-      uses: P3TERX/ssh2actions@main
-      if: (github.event.inputs.ssh == 'true' && github.event.inputs.ssh  != 'false') || contains(github.event.action, 'ssh')
-
-    - name: Download package
-      id: package
+    - name: 下载软件包
       run: |
         cd openwrt
-        make defconfig
         make download -j8
         find dl -size -1024c -exec ls -l {} \;
         find dl -size -1024c -exec rm -f {} \;
 
-    - name: Compile the firmware
+    - name: 编译固件
       id: compile
       run: |
         cd openwrt
-        echo -e "$(nproc) thread compile"
+        echo "START_TIME=$(date +%s)" >> $GITHUB_ENV
         make -j$(nproc) || make -j1 V=s
         echo "status=success" >> $GITHUB_OUTPUT
         grep '^CONFIG_TARGET.*DEVICE.*=y' .config | sed -r 's/.*DEVICE_(.*)=y/\1/' > DEVICE_NAME
         [ -s DEVICE_NAME ] && echo "DEVICE_NAME=_$(cat DEVICE_NAME)" >> $GITHUB_ENV
         echo "FILE_DATE=_$(date +"%Y%m%d%H%M")" >> $GITHUB_ENV
+        # 计算编译耗时
+        echo "DURATION=$(( ($(date +%s) - START_TIME) / 60 ))" >> $GITHUB_ENV
 
-    - name: Check space usage
-      if: (!cancelled())
-      run: df -hT
-
-    - name: Upload bin directory
-      uses: actions/upload-artifact@v4
-      if: steps.compile.outputs.status == 'success' && env.UPLOAD_BIN_DIR == 'true'
-      with:
-        name: OpenWrt_bin${{ env.DEVICE_NAME }}${{ env.FILE_DATE }}
-        path: openwrt/bin
-
-    - name: Organize files
+    - name: 整理输出文件
       id: organize
       if: env.UPLOAD_FIRMWARE == 'true' && !cancelled()
       run: |
@@ -150,9 +145,39 @@ jobs:
         echo "FIRMWARE=$PWD" >> $GITHUB_ENV
         echo "status=success" >> $GITHUB_OUTPUT
 
-    - name: Upload firmware directory
+    - name: 上传固件至 Artifacts
       uses: actions/upload-artifact@v4
       if: steps.organize.outputs.status == 'success' && !cancelled()
       with:
         name: OpenWrt_firmware${{ env.DEVICE_NAME }}${{ env.FILE_DATE }}
         path: ${{ env.FIRMWARE }}
+
+    - name: 发布至 Release
+      uses: softprops/action-gh-release@v2
+      if: env.UPLOAD_RELEASE == 'true' && steps.compile.outputs.status == 'success' && !cancelled()
+      with:
+        tag_name: ${{ steps.compile.outputs.FILE_DATE }}
+        body: |
+          编译耗时：${{ env.DURATION }} 分钟
+          源码地址：${{ env.REPO_URL }}
+        files: ${{ env.FIRMWARE }}/*
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: 清理历史 Workflow 运行记录
+      # 已修正仓库路径，确保 2026 年兼容性
+      uses: Mattraks/delete-workflow-runs@v2
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        repository: ${{ github.repository }}
+        retain_days: 1
+        keep_minimum_runs: 3
+
+    - name: 删除旧的 Release
+      uses: dev-drprasad/delete-older-releases@v0.3.4
+      if: env.UPLOAD_RELEASE == 'true' && !cancelled()
+      with:
+        keep_latest: 3
+        delete_tags: true
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
