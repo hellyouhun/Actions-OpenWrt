@@ -155,7 +155,7 @@ jobs:
       run: |
         echo "release_tag=$(date +"%Y.%m.%d-%H%M")" >> $GITHUB_OUTPUT
         touch release.txt
-        echo "🚀 OpenWrt ARM 专项版发布" >> release.txt
+        echo "🚀 OpenWrt x86-x64 + ARM 专项版发布" >> release.txt
         echo "- 编译耗时：${{ env.DURATION }} 分钟" >> release.txt
         echo "status=success" >> $GITHUB_OUTPUT
 
