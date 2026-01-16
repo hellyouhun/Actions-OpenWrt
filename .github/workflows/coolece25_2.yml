@@ -1,5 +1,5 @@
 # 2026 ARM 专项优化版 - 集成 SSHTunnel 搬运与冲突修复
-name: coolede-25-ARM-Special
+name: coolede-25-2
 
 on:
   repository_dispatch:
