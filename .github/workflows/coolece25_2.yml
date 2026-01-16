@@ -4,7 +4,7 @@
 # github.com
 # Description: Build OpenWrt using GitHub Actions
 #
-name: coolede-25ARM修复
+name: coolede-25-2
 
 on:
   repository_dispatch:
