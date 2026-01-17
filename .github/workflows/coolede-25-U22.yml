@@ -13,7 +13,7 @@ on:
         default: 'false'
 
 env:
-  REPO_URL: ttps://github.com/coolsnowwolf/lede
+  REPO_URL: https://github.com/coolsnowwolf/lede
   REPO_BRANCH: master
   FEEDS_CONF: 25feeds.conf.default
   CONFIG_FILE: .config25
