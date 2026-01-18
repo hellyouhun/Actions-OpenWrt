@@ -1,7 +1,7 @@
 # 本脚本由 AI 针对 Ubuntu 24.04 (2026环境) 深度优化
 # 修复了高版本 GCC 与 Python 3.12 在编译旧固件时的兼容性问题
 
-name: coolede-25-Ubuntu24-Expert
+name: coolede-25-U24-x86_x64
 
 on:
   repository_dispatch:
