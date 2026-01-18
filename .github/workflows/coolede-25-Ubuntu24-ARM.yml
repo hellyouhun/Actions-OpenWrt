@@ -39,6 +39,8 @@ jobs:
       env:
         DEBIAN_FRONTEND: noninteractive
       run: |
+        echo "优化前空间检查："
+        df -h
         # 1. 移除庞大的预装软件及缓存，释放约 30GB+
         sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /usr/local/share/powershell /usr/local/share/chromium /usr/local/lib/node_modules /opt/hostedtoolcache/CodeQL
         docker rmi $(docker images -q) 2>/dev/null || true
@@ -55,6 +57,8 @@ jobs:
         sudo timedatectl set-timezone "$TZ"
         sudo mkdir -p /workdir
         sudo chown $USER:$GROUPS /workdir
+        echo "初始空间检查："
+        df -h
 
     - name: 构建 LVM 虚拟磁盘 (防止爆磁盘)
       run: |
@@ -71,6 +75,8 @@ jobs:
         sudo mkfs.xfs /dev/github/runner
         sudo mount /dev/github/runner /workdir
         sudo chown -R $USER:$GROUPS /workdir
+        echo "初始空间检查："
+        df -h
 
     - name: 下载 OpenWrt 源码
       working-directory: /workdir
