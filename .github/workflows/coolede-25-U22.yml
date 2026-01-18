@@ -34,6 +34,12 @@ jobs:
     steps:
     - name: 检查项目源码
       uses: actions/checkout@v4
+      
+    - name: 检查点 1：清理前磁盘状态
+      run: |
+        echo "=== 系统初始磁盘状态 ==="
+        df -hT
+        echo "========================"
 
     - name: 初始化编译环境
       env:
@@ -50,8 +56,12 @@ jobs:
         sudo -E apt-get -qq autoremove --purge
         sudo -E apt-get -qq clean
         sudo timedatectl set-timezone "$TZ"
-        echo "初始空间检查："
-        df -h
+        
+    - name: 检查点 2：清理后磁盘状态
+      run: |
+        echo "=== 环境清理后磁盘状态 ==="
+        df -hT
+        echo "========================"
 
     - name: 构建虚拟磁盘 (LVM 精确扩容)
       run: |
@@ -78,8 +88,11 @@ jobs:
         sudo mount -o noatime /dev/github/runner /workdir
         sudo chown $USER:$GROUPS /workdir
         
-        echo "扩容后磁盘报告："
-        df -hT
+    - name: 检查点 3：虚拟磁盘挂载后状态
+      run: |
+        echo "=== 扩容后磁盘状态（重点查看 /workdir） ==="
+        df -hT /workdir
+        echo "=========================================="
 
     - name: 下载源码 (Clone)
       working-directory: /workdir
