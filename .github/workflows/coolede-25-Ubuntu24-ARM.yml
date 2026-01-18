@@ -108,16 +108,16 @@ jobs:
       run: |
         # 1. 克隆官方 Luci 倉庫
         git clone --depth=1 https://github.com/openwrt/luci tmp_luci
-        #git clone --depth=1 https://github.com/openwrt/packages tmp_packages
+        git clone --depth=1 https://github.com/openwrt/packages tmp_packages
         # 2. 確保目標目錄存在（feeds/luci 路徑是在 openwrt 根目錄下）
         # 注意：如果 feeds 裡沒有這個目錄，說明 update 沒成功或該類別不存在
         #mkdir -p openwrt/feeds/luci/applications/luci-app-sshtunnel
         # 3. 拷貝插件代碼
         cp -rf tmp_luci/applications/luci-app-sshtunnel/* openwrt/feeds/luci/applications/luci-app-sshtunnel/
-        #cp -rf tmp_packages/net/openssh/* openwrt/feeds/packages/net/openssh/
+        #cp -rf tmp_packages/net/* openwrt/feeds/packages/net/
         # 4. 清理臨時倉庫
         rm -rf tmp_luci
-        #rm -rf tmp_packages
+        rm -rf tmp_packages
 
     - name: 安装 Feeds
       run: |
