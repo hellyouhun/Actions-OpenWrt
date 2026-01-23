@@ -114,7 +114,14 @@ jobs:
         #mkdir -p openwrt/feeds/luci/applications/luci-app-sshtunnel
         # 3. 拷貝插件代碼
         cp -rf tmp_luci/applications/luci-app-sshtunnel/* openwrt/feeds/luci/applications/luci-app-sshtunnel/
-        cp -rf tmp_packages/net/* openwrt/feeds/packages/net/
+        cp -rf tmp_packages/net/pppossh openwrt/feeds/packages/net/
+        cp -rf tmp_packages/net/sshtunnel openwrt/feeds/packages/net/
+        cp -rf tmp_packages/net/openssh openwrt/feeds/packages/net/
+        cp -rf tmp_packages/net/xray-core openwrt/feeds/packages/net/
+        cp -rf tmp_packages/net/zerotier openwrt/feeds/packages/net/
+        cp -rf tmp_packages/net/v2ray-core openwrt/feeds/packages/net/
+        cp -rf tmp_packages/net/v2ray-geodata openwrt/feeds/packages/net/
+        cp -rf tmp_packages/net/v2raya openwrt/feeds/packages/net/
         # 4. 清理臨時倉庫
         rm -rf tmp_luci
         rm -rf tmp_packages
