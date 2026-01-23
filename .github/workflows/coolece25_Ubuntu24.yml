@@ -118,7 +118,6 @@ jobs:
         cp -rf tmp_packages/net/sshtunnel openwrt/feeds/packages/net/
         cp -rf tmp_packages/net/openssh openwrt/feeds/packages/net/
         cp -rf tmp_packages/net/xray-core openwrt/feeds/packages/net/
-        cp -rf tmp_packages/net/zerotier openwrt/feeds/packages/net/
         cp -rf tmp_packages/net/v2ray-core openwrt/feeds/packages/net/
         cp -rf tmp_packages/net/v2ray-geodata openwrt/feeds/packages/net/
         cp -rf tmp_packages/net/v2raya openwrt/feeds/packages/net/
