@@ -115,8 +115,6 @@ jobs:
         # 3. 拷貝插件代碼
         cp -rf tmp_luci/applications/luci-app-sshtunnel/* openwrt/feeds/luci/applications/luci-app-sshtunnel/
         cp -rf tmp_packages/net/pppossh openwrt/feeds/packages/net/
-        cp -rf tmp_packages/net/sshtunnel openwrt/feeds/packages/net/
-        cp -rf tmp_packages/net/openssh openwrt/feeds/packages/net/
         cp -rf tmp_packages/net/xray-core openwrt/feeds/packages/net/
         cp -rf tmp_packages/net/v2ray-core openwrt/feeds/packages/net/
         cp -rf tmp_packages/net/v2ray-geodata openwrt/feeds/packages/net/
