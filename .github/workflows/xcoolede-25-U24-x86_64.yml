@@ -1,0 +1,356 @@
+# -------------------------------------------------
+#  OpenWrt 编译（Ubuntu 24.04）全自动化 CI
+#  2026‑04‑16 版本
+#  重点：安全磁盘清理 + 动态 LVM + 缓存 + 更严谨错误处理
+# -------------------------------------------------
+name: 改xcoolede-25-U24-x86_64
+
+on:
+  repository_dispatch:
+  workflow_dispatch:
+    inputs:
+      ssh:
+        description: '开启 SSH 调试'
+        required: false
+        default: 'false'
+      use_lvm:
+        description: '是否启用 LVM 虚拟磁盘 (默认 true)'
+        required: false
+        default: 'true'
+
+env:
+  REPO_URL:      https://github.com/coolsnowwolf/lede
+  REPO_BRANCH:   master
+  FEEDS_CONF:    25feeds.conf.default
+  CONFIG_FILE:   .config25
+  DIY_P1_SH:     25diy-part1.sh
+  DIY_P2_SH:     25diy-part2.sh
+  UPLOAD_BIN_DIR: false            # 是否把 bin/packages 也一起上传
+  UPLOAD_FIRMWARE: true
+  UPLOAD_RELEASE: true
+  TZ: Asia/Shanghai
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    permissions:
+      actions: write
+      contents: write
+
+    # -----------------------------------------------------------------
+    #  1️⃣ 环境准备（全局 Bash 参数，确保一步出错即停止）
+    # -----------------------------------------------------------------
+    defaults:
+      run:
+        shell: bash {0}
+    steps:
+      - name: 设置安全 Bash 参数
+        run: |
+          set -euo pipefail
+          echo "SHELL_OPTS='-euo pipefail'" >> $GITHUB_ENV
+
+      # -----------------------------------------------------------------
+      #  2️⃣ 代码检出
+      # -----------------------------------------------------------------
+      - name: Checkout source (full depth)
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0   # 为后面可能的 git describe 做准备
+
+      # -----------------------------------------------------------------
+      #  3️⃣ 检查磁盘（记录初始状态）
+      # -----------------------------------------------------------------
+      - name: 📊 初始磁盘概览
+        run: |
+          df -hT
+
+      # -----------------------------------------------------------------
+      #  4️⃣ 安装编译所需依赖（只保留必需软件，避免大规模删除系统文件）
+      # -----------------------------------------------------------------
+      - name: 安装编译工具链 & 清理不必要的包
+        env:
+          DEBIAN_FRONTEND: noninteractive
+        run: |
+          set -euo pipefail
+
+          # ① 删除常见的 “大体积” 包（仅限于官方 runner，可安全删除）
+          sudo apt-get purge -y \
+            azure-cli* docker* ghc* zulu* llvm* firefox \
+            google* dotnet* powershell* openjdk* mysql* php* \
+            mongodb* snap* codeql* \
+            && sudo apt-get autoremove -y && sudo apt-get clean
+
+          # ② 安装 OpenWrt 编译依赖（官方推荐列表）
+          sudo apt-get update -qq
+          sudo apt-get install -y \
+            ack antlr3 asciidoc autoconf automake autopoint \
+            binutils bison build-essential bzip2 ccache cmake cpio curl \
+            device-tree-compiler fastjar flex gawk gettext \
+            gcc-multilib g++-multilib git gperf haveged help2man \
+            intltool libelf-dev libglib2.0-dev libgmp-dev libltdl-dev \
+            libmpc-dev libmpfr-dev libncurses5-dev libncursesw5-dev \
+            libreadline-dev libssl-dev libtool lrzsz genisoimage \
+            msmtp nano ninja-build p7zip-full patch pkgconf \
+            python3 python3-pyelftools libpython3-dev python3-setuptools \
+            qemu-utils rsync scons squashfs-tools subversion swig texinfo \
+            uglifyjs upx-ucl unzip vim wget xmlto xxd zlib1g-dev \
+            && sudo apt-get autoremove -y && sudo apt-get clean
+
+          # ③ 确保 tzdata 已经设置正确（防止后面时间戳错位）
+          sudo timedatectl set-timezone "$TZ"
+
+          # ④ 创建工作目录（不会被后面的 LVM 步骤覆盖）
+          sudo mkdir -p /workdir
+          sudo chown "$USER:$GROUPS" /workdir
+
+      # -----------------------------------------------------------------
+      #  5️⃣ 检查磁盘（删除/安装后）——帮助判断是否需要 LVM
+      # -----------------------------------------------------------------
+      - name: 📊 清理后磁盘概览
+        run: df -hT
+
+      # -----------------------------------------------------------------
+      #  6️⃣ （可选）LVM 虚拟磁盘：合并 /mnt + / 的空闲空间
+      # -----------------------------------------------------------------
+      - name: 创建 LVM 虚拟磁盘 (if enabled)
+        if: ${{ inputs.use_lvm == 'true' }}
+        run: |
+          set -euo pipefail
+          # 计算可用空间（保守 1 GB 余量）
+          MNT_FREE=$(df -P /mnt | tail -1 | awk '{print $4}')
+          ROOT_FREE=$(df -P / | tail -1 | awk '{print $4}')
+          # 转成 GiB，向下取整后再减去 1‑2 GB 防止磁盘被占满
+          MNT_GB=$(( MNT_FREE / 1024 - 1 ))
+          ROOT_GB=$(( ROOT_FREE / 1024 - 2 ))
+          echo "==> 将使用 ${MNT_GB}G + ${ROOT_GB}G ≈ $((MNT_GB+ROOT_GB))G 来创建 LV"
+
+          # 创建镜像文件
+          sudo truncate -s "${MNT_GB}"G /mnt/mnt.img
+          sudo truncate -s "${ROOT_GB}"G /root.img
+
+          # 动态获取空闲 loop 设备
+          LOOP1=$(sudo losetup -f --show /mnt/mnt.img)
+          LOOP2=$(sudo losetup -f --show /root.img)
+
+          # 创建 PV → VG → LV
+          sudo pvcreate "$LOOP1" "$LOOP2"
+          sudo vgcreate github "$LOOP1" "$LOOP2"
+          sudo lvcreate -n runner -l 100%FREE github
+
+          # XFS 格式化并挂载
+          sudo mkfs.xfs -f /dev/github/runner
+          sudo mount /dev/github/runner /workdir
+          sudo chown -R "$USER:$GROUPS" /workdir
+          echo "LVM 已挂载到 /workdir"
+
+      # -----------------------------------------------------------------
+      #  7️⃣ 检查 LVM /workdir 挂载情况
+      # -----------------------------------------------------------------
+      - name: 📊 /workdir 磁盘概览
+        run: df -hT /workdir || echo "未使用 LVM，/workdir 仍为空"
+
+      # -----------------------------------------------------------------
+      #  8️⃣ 下载 OpenWrt 源码
+      # -----------------------------------------------------------------
+      - name: Clone OpenWrt (lede) source
+        working-directory: /workdir
+        run: |
+          set -euo pipefail
+          git clone --depth 1 "$REPO_URL" -b "$REPO_BRANCH" openwrt
+          # 让后续步骤能够通过 $GITHUB_WORKSPACE 找到源码
+          ln -sfn /workdir/openwrt "$GITHUB_WORKSPACE/openwrt"
+
+      # -----------------------------------------------------------------
+      #  9️⃣ 加载自定义 Feeds（DIY‑P1）
+      # -----------------------------------------------------------------
+      - name: DIY‑P1 – 替换 feeds.conf 并执行脚本
+        run: |
+          set -euo pipefail
+          if [[ -e "${FEEDS_CONF}" ]]; then
+            mv "${FEEDS_CONF}" openwrt/feeds.conf.default
+          fi
+          chmod +x "${DIY_P1_SH}"
+          cd openwrt
+          "${GITHUB_WORKSPACE}/${DIY_P1_SH}"
+
+      # -----------------------------------------------------------------
+      #  🔟 更新 Feeds
+      # -----------------------------------------------------------------
+      - name: Update all feeds
+        run: |
+          set -euo pipefail
+          cd openwrt
+          ./scripts/feeds update -a
+
+      # -----------------------------------------------------------------
+      #  1️⃣1️⃣ 克隆并合并官方 luci、packages（sshtunnel、xray、v2ray…）
+      # -----------------------------------------------------------------
+      - name: 合并 OpenWrt 官方 Luci / Packages
+        run: |
+          set -euo pipefail
+          cd openwrt
+          # ① 官方仓库（浅克隆，省流量）
+          git clone --depth=1 https://github.com/openwrt/luci tmp_luci
+          git clone --depth=1 https://github.com/openwrt/packages tmp_packages
+          # ② 拷贝需要的子目录（如果目录不存在则先创建）
+          mkdir -p feeds/luci/applications/luci-app-sshtunnel
+          cp -a tmp_luci/applications/luci-app-sshtunnel/* feeds/luci/applications/luci-app-sshtunnel/
+          cp -a tmp_packages/net/pppossh feeds/packages/net/
+          cp -a tmp_packages/net/xray-core feeds/packages/net/
+          cp -a tmp_packages/net/v2ray-core feeds/packages/net/
+          cp -a tmp_packages/net/v2ray-geodata feeds/packages/net/
+          cp -a tmp_packages/net/v2raya feeds/packages/net/
+          # ③ 清除临时目录
+          rm -rf tmp_luci tmp_packages
+
+      # -----------------------------------------------------------------
+      #  1️⃣2️⃣ 安装 Feeds
+      # -----------------------------------------------------------------
+      - name: Install all feeds
+        run: |
+          set -euo pipefail
+          cd openwrt
+          ./scripts/feeds install -a
+
+      # -----------------------------------------------------------------
+      #  1️⃣3️⃣ DIY‑P2 – 复制自定义文件、配置并生成 .config
+      # -----------------------------------------------------------------
+      - name: DIY‑P2 – 复制 files / .config & run script
+        run: |
+          set -euo pipefail
+          if [[ -d files ]]; then
+            mv files openwrt/files
+          fi
+          if [[ -e "${CONFIG_FILE}" ]]; then
+            mv "${CONFIG_FILE}" openwrt/.config
+          fi
+          chmod +x "${DIY_P2_SH}"
+          cd openwrt
+          "${GITHUB_WORKSPACE}/${DIY_P2_SH}"
+          make defconfig
+
+      # -----------------------------------------------------------------
+      #  1️⃣4️⃣ 缓存下载的源码包（dl）——提升后续运行效率
+      # -----------------------------------------------------------------
+      - name: Cache OpenWrt dl directory
+        id: cache-dl
+        uses: actions/cache@v4
+        with:
+          path: openwrt/dl
+          key: openwrt-dl-${{ runner.os }}-${{ env.REPO_BRANCH }}-${{ hashFiles('openwrt/.config') }}
+          restore-keys: |
+            openwrt-dl-${{ runner.os }}-
+
+      # -----------------------------------------------------------------
+      #  1️⃣5️⃣ 预下载所有源码包（并删除错误/小于 1 KB 的文件）
+      # -----------------------------------------------------------------
+      - name: Download all source packages
+        run: |
+          set -euo pipefail
+          cd openwrt
+          make download -j$(nproc)
+          find dl -type f -size -1k -exec rm -f {} +
+
+      # -----------------------------------------------------------------
+      #  1️⃣6️⃣ 编译固件（记录时间、设备名、文件日期）
+      # -----------------------------------------------------------------
+      - name: Compile firmware
+        id: compile
+        run: |
+          set -euo pipefail
+          cd openwrt
+          echo "START_TIME=$(date +%s)" >> $GITHUB_ENV
+
+          if make -j$(nproc); then
+            echo "compilation_status=success" >> $GITHUB_OUTPUT
+          else
+            echo "compilation_status=failed" >> $GITHUB_OUTPUT
+            exit 1
+          fi
+
+          # 把编译得到的 Device 名称、时间戳写入 env，供后面 Release 使用
+          grep '^CONFIG_TARGET.*DEVICE.*=y' .config | \
+            sed -r 's/.*DEVICE_(.*)=y/\1/' > DEVICE_NAME
+          if [[ -s DEVICE_NAME ]]; then
+            echo "DEVICE_NAME=_$(cat DEVICE_NAME)" >> $GITHUB_ENV
+          else
+            echo "DEVICE_NAME=" >> $GITHUB_ENV
+          fi
+          echo "FILE_DATE=_$(date +"%Y%m%d%H%M")" >> $GITHUB_ENV
+          echo "DURATION=$(( ($(date +%s) - START_TIME) / 60 ))" >> $GITHUB_ENV
+
+      # -----------------------------------------------------------------
+      #  1️⃣7️⃣ 整理编译产物（可选保留 packages）
+      # -----------------------------------------------------------------
+      - name: Organize artifacts & free space
+        id: organize
+        if: env.UPLOAD_FIRMWARE == 'true' && steps.compile.outputs.compilation_status == 'success'
+        run: |
+          set -euo pipefail
+          cd openwrt
+
+          # ① 删除占空间的 build_dir（toolchain、target 等）
+          rm -rf build_dir/target-* build_dir/toolchain-*
+
+          # ② 只保留 bin/targets/*/*，其它目录全部移除
+          cd bin/targets/*/*
+          rm -rf packages   # 如不需要可删掉
+          echo "FIRMWARE=$PWD" >> $GITHUB_ENV
+          echo "organize_status=success" >> $GITHUB_OUTPUT
+
+      # -----------------------------------------------------------------
+      #  1️⃣8️⃣ 检查磁盘（编译后）——确保还有足够空间供上传/Release
+      # -----------------------------------------------------------------
+      - name: 📊 编译结束磁盘概览
+        run: df -hT
+
+      # -----------------------------------------------------------------
+      #  1️⃣9️⃣ 上传 Firmware 到 Artifacts
+      # -----------------------------------------------------------------
+      - name: Upload firmware as artifact
+        uses: actions/upload-artifact@v5
+        if: steps.organize.outputs.organize_status == 'success'
+        with:
+          name: OpenWrt_firmware${{ env.DEVICE_NAME }}${{ env.FILE_DATE }}
+          path: ${{ env.FIRMWARE }}
+
+      # -----------------------------------------------------------------
+      #  2️⃣0️⃣ 创建 Release（带唯一 Tag）
+      # -----------------------------------------------------------------
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        if: env.UPLOAD_RELEASE == 'true' && steps.compile.outputs.compilation_status == 'success'
+        with:
+          tag_name: build${{ env.FILE_DATE }}-${{ github.run_id }}
+          name: OpenWrt Firmware ${{ env.DEVICE_NAME }} ${{ env.FILE_DATE }}
+          body: |
+            🚀 **OpenWrt ARM 优化版**（自动化构建）
+            ⏱️ 编译耗时：${{ env.DURATION }} 分钟
+            📂 源码仓库：${{ env.REPO_URL }}
+            📦 目标平台：${{ env.DEVICE_NAME }}
+          files: ${{ env.FIRMWARE }}/*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # -----------------------------------------------------------------
+      #  2️⃣1️⃣ 清理旧 Workflow runs（retain 最近 3 次 + 1 天）
+      # -----------------------------------------------------------------
+      - name: Delete old workflow runs
+        uses: Mattraks/delete-workflow-runs@v2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          repository: ${{ github.repository }}
+          retain_days: 1
+          keep_minimum_runs: 3
+
+      # -----------------------------------------------------------------
+      #  2️⃣2️⃣ 删除旧 Release（仅保留最近 3 个）
+      # -----------------------------------------------------------------
+      - name: Delete older releases
+        if: env.UPLOAD_RELEASE == 'true'
+        uses: dev-drprasad/delete-older-releases@v0.3.4
+        with:
+          keep_latest: 3
+          delete_tags: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
