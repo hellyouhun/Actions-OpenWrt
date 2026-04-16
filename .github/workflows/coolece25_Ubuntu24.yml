@@ -33,7 +33,7 @@ jobs:
 
     steps:
     - name: 检查项目源码
-      uses: actions/checkout@v4
+      uses: actions/checkout@v5
 
     - name: 检查点 1：清理前磁盘状态
       run: |
@@ -174,7 +174,7 @@ jobs:
         echo "========================"
 
     - name: 上传固件至 Artifacts
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       if: steps.organize.outputs.status == 'success' && !cancelled()
       with:
         name: OpenWrt_firmware${{ env.DEVICE_NAME }}${{ env.FILE_DATE }}
