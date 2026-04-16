@@ -174,7 +174,7 @@ jobs:
         echo "========================"
 
     - name: 上传固件至 Artifacts
-      uses: actions/upload-artifact@v5
+      uses: actions/upload-artifact@v7
       if: steps.organize.outputs.status == 'success' && !cancelled()
       with:
         name: OpenWrt_firmware${{ env.DEVICE_NAME }}${{ env.FILE_DATE }}
@@ -201,11 +201,29 @@ jobs:
         retain_days: 1
         keep_minimum_runs: 3
 
-    - name: 清理旧 Release
-      uses: dev-drprasad/delete-older-releases@v0.3.4
+#    - name: 清理旧 Release
+#      uses: dev-drprasad/delete-older-releases@v0.3.4
+#      if: env.UPLOAD_RELEASE == 'true' && !cancelled()
+#      with:
+#        keep_latest: 3
+#        delete_tags: true
+#      env:
+#        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - name: 删除旧 Tag
       if: env.UPLOAD_RELEASE == 'true' && !cancelled()
-      with:
-        keep_latest: 3
-        delete_tags: true
+      run: |
+        gh release list --limit 100 --json tagName \
+        | jq -r '.[]?.tagName' | tail -n +4 | xargs -r -n1 gh release delete --yes
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+#    - name: 清理旧 Release
+#      if: env.UPLOAD_RELEASE == 'true' && !cancelled()
+#      uses: Nats-ji/delete-old-releases@v1          # ← 使用专门的 Delete‑Old‑Releases Action
+#      with:
+#      token: ${{ secrets.GITHUB_TOKEN }}           # 必须的访问令牌
+#      keep-count: 3                               # 保留最新的 3 个 Release
+##    remove-tags: true                           # 同时删除这些 Release 的 Git tag
+    #（下面的参数是可选的，按需打开）
+    # keep-old-minor-releases: false
+    # dry-run: false
