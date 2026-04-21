@@ -112,36 +112,45 @@ jobs:
       # -----------------------------------------------------------------
       #  6️⃣ （可选）LVM 虚拟磁盘：合并 /mnt + / 的空闲空间
       # -----------------------------------------------------------------
+
       - name: 创建 LVM 虚拟磁盘 (if enabled)
         if: ${{ inputs.use_lvm == 'true' }}
         run: |
-          set -euo pipefail
-          # 计算可用空间（保守 1 GB 余量）
-          MNT_FREE=$(df -P /mnt | tail -1 | awk '{print $4}')
-          ROOT_FREE=$(df -P / | tail -1 | awk '{print $4}')
-          # 转成 GiB，向下取整后再减去 1‑2 GB 防止磁盘被占满
-          MNT_GB=$(( MNT_FREE / 1024 - 1 ))
-          ROOT_GB=$(( ROOT_FREE / 1024 - 2 ))
-          echo "==> 将使用 ${MNT_GB}G + ${ROOT_GB}G ≈ $((MNT_GB+ROOT_GB))G 来创建 LV"
+         set -euo pipefail
+         # df -P 输出单位是 1KB 块
+            MNT_FREE=$(df -P /mnt | tail -1 | awk '{print $4}')
+            ROOT_FREE=$(df -P / | tail -1 | awk '{print $4}')
 
-          # 创建镜像文件
-          sudo truncate -s "${MNT_GB}"G /mnt/mnt.img
-          sudo truncate -s "${ROOT_GB}"G /root.img
+            # 正确换算 KB → GiB (必须 ÷1024÷1024)
+            MNT_GB=$(( MNT_FREE / 1024 / 1024 - 1 ))
+            ROOT_GB=$(( ROOT_FREE / 1024 / 1024 - 2 ))
 
-          # 动态获取空闲 loop 设备
+          # 安全兜底：防止空间不足变成负数
+            MNT_GB=$(( MNT_GB < 5 ? 5 : MNT_GB ))
+            ROOT_GB=$(( ROOT_GB < 5 ? 5 : ROOT_GB ))
+
+            echo "==> 将使用 ${MNT_GB}G + ${ROOT_GB}G ≈ $((MNT_GB+ROOT_GB))G 来创建 LV"
+           # 创建镜像文件
+            sudo truncate -s "${MNT_GB}G" /mnt/mnt.img
+            sudo truncate -s "${ROOT_GB}G" /root.img
+ 
+    # 挂载 loop 设备
           LOOP1=$(sudo losetup -f --show /mnt/mnt.img)
           LOOP2=$(sudo losetup -f --show /root.img)
 
-          # 创建 PV → VG → LV
+    # LVM 创建
           sudo pvcreate "$LOOP1" "$LOOP2"
           sudo vgcreate github "$LOOP1" "$LOOP2"
           sudo lvcreate -n runner -l 100%FREE github
 
-          # XFS 格式化并挂载
+         # 格式化 + 挂载
           sudo mkfs.xfs -f /dev/github/runner
+          sudo mkdir -p /workdir
           sudo mount /dev/github/runner /workdir
-          sudo chown -R "$USER:$GROUPS" /workdir
-          echo "LVM 已挂载到 /workdir"
+          sudo chown -R "$USER:$USER" /workdir
+
+          echo "✅ LVM 虚拟磁盘已成功挂载到 /workdir"
+          shell: /usr/bin/bash {0}
 
       # -----------------------------------------------------------------
       #  7️⃣ 检查 LVM /workdir 挂载情况
