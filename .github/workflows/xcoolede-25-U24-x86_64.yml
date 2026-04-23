@@ -355,10 +355,10 @@ jobs:
       # -----------------------------------------------------------------
       #  2️⃣2️⃣ 删除旧 Release（仅保留最近 3 个）
       # -----------------------------------------------------------------
-    - name: 删除旧 Tag
-      if: env.UPLOAD_RELEASE == 'true' && !cancelled()
-      run: |
-        gh release list --limit 100 --json tagName \
-        | jq -r '.[]?.tagName' | tail -n +4 | xargs -r -n1 gh release delete --yes
-      env:
-       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: 删除旧 Tag
+        if: env.UPLOAD_RELEASE == 'true' && !cancelled()
+        run: |
+          gh release list --limit 100 --json tagName \
+          | jq -r '.[]?.tagName' | tail -n +4 | xargs -r -n1 gh release delete --yes
+        env:
+         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
