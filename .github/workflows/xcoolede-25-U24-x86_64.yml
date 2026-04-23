@@ -327,7 +327,7 @@ jobs:
       #  2️⃣0️⃣ 创建 Release（带唯一 Tag）
       # -----------------------------------------------------------------
       - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         if: env.UPLOAD_RELEASE == 'true' && steps.compile.outputs.compilation_status == 'success'
         with:
           tag_name: build${{ env.FILE_DATE }}-${{ github.run_id }}
@@ -355,11 +355,10 @@ jobs:
       # -----------------------------------------------------------------
       #  2️⃣2️⃣ 删除旧 Release（仅保留最近 3 个）
       # -----------------------------------------------------------------
-      - name: Delete older releases
-        if: env.UPLOAD_RELEASE == 'true'
-        uses: dev-drprasad/delete-older-releases@v0.3.4
-        with:
-          keep_latest: 3
-          delete_tags: true
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - name: 删除旧 Tag
+      if: env.UPLOAD_RELEASE == 'true' && !cancelled()
+      run: |
+        gh release list --limit 100 --json tagName \
+        | jq -r '.[]?.tagName' | tail -n +4 | xargs -r -n1 gh release delete --yes
+      env:
+       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
