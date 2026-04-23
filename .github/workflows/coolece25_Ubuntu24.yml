@@ -181,7 +181,7 @@ jobs:
         path: ${{ env.FIRMWARE }}
 
     - name: 发布至 Release
-      uses: softprops/action-gh-release@v2
+      uses: softprops/action-gh-release@v3
       if: env.UPLOAD_RELEASE == 'true' && steps.compile.outputs.status == 'success' && !cancelled()
       with:
         tag_name: ${{ env.FILE_DATE }}
