@@ -237,5 +237,3 @@ jobs:
     # keep-old-minor-releases: false
     # dry-run: false
 
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
