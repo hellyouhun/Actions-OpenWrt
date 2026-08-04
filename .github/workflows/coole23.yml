@@ -157,6 +157,8 @@ jobs:
       run: |
         cd openwrt
         echo "START_TIME=$(date +%s)" >> $GITHUB_ENV
+                # 强制用双线程或单线程编译 xray-core，避免内存溢出
+        make package/feeds/luci/xray-core/compile -j2 V=s || make package/feeds/custom/xray-core/compile -j2 V=s
         make -j$(nproc) || make -j1 V=s
         echo "status=success" >> $GITHUB_OUTPUT
         grep '^CONFIG_TARGET.*DEVICE.*=y' .config | sed -r 's/.*DEVICE_(.*)=y/\1/' > DEVICE_NAME
