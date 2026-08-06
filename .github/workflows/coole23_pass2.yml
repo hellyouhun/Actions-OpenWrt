@@ -112,9 +112,7 @@ jobs:
       run: |
         cd openwrt
         ./scripts/feeds update -a
-        #移除 openwrt feeds 自带的核心库# 移除 openwrt feeds 过时的luci版本
-        rm -rf feeds/packages/net/{xray-core,v2ray-geodata,sing-box,chinadns-ng,dns2socks,hysteria,ipt2socks,microsocks,naiveproxy,shadowsocks-rust,shadowsocksr-libev,simple-obfs,tcping,v2ray-plugin,xray-plugin,geoview,shadow-tls}
-        rm -rf feeds/luci/applications/luci-app-passwall
+
 #    - name: 克隆官方 Luci 倉庫 (引入 SSHTunnel 并修复 OpenSSH 冲突)
 #      run: |
 #        # 1. 克隆官方 Luci 倉庫
@@ -138,7 +136,11 @@ jobs:
       run: |
         cd openwrt
         ./scripts/feeds install -a
-
+        #移除 openwrt feeds 自带的核心库# 移除 openwrt feeds 过时的luci版本
+        rm -rf feeds/packages/net/{xray-core,v2ray-geodata,sing-box,chinadns-ng,dns2socks,hysteria,ipt2socks,microsocks,naiveproxy,shadowsocks-rust,shadowsocksr-libev,simple-obfs,tcping,v2ray-plugin,xray-plugin,geoview,shadow-tls}
+        rm -rf feeds/luci/applications/luci-app-passwall
+        git clone https://github.com/Openwrt-Passwall/openwrt-passwall-packages package/passwall-packages
+        git clone https://github.com/Openwrt-Passwall/openwrt-passwall package/passwall-luci
     - name: 加载自定义配置 (DIY-P2)
       run: |
         [ -e files ] && mv files openwrt/files
@@ -153,12 +155,12 @@ jobs:
         cd openwrt
         make download -j8
         find dl -size -1024c -exec rm -f {} \;
-    - name: 设置 Go 语言的环境变量
-      run: |
-        echo "GOMAXPROCS=2" >> $GITHUB_ENV
-        echo "GOPROXY=https://golang.org,direct" >> $GITHUB_ENV
-        # 2. 动态查找 xray-core 的实际包路径
-        #XRAY_PATH=$(find package/ -maxdepth 4 -type d -name "xray-core" | head -n 1)
+#    - name: 设置 Go 语言的环境变量
+#      run: |
+#        echo "GOMAXPROCS=2" >> $GITHUB_ENV
+#        echo "GOPROXY=https://golang.org,direct" >> $GITHUB_ENV
+#        # 2. 动态查找 xray-core 的实际包路径
+#        #XRAY_PATH=$(find package/ -maxdepth 4 -type d -name "xray-core" | head -n 1)
     
        # if [ -n "$XRAY_PATH" ]; then
        # echo "成功定位 xray-core 路径: $XRAY_PATH"
