@@ -113,9 +113,6 @@ jobs:
       run: |
         cd openwrt
         ./scripts/feeds update -a
-        rm -rf feeds/packages/net/{xray-core,v2ray-geodata,sing-box,chinadns-ng,dns2socks,hysteria,ipt2socks,microsocks,naiveproxy,shadowsocks-rust,shadowsocksr-libev,simple-obfs,tcping,v2ray-plugin,xray-plugin,geoview,shadow-tls}
-        rm -rf feeds/luci/applications/luci-app-passwall
-
 #    - name: 克隆官方 Luci 倉庫 (引入 SSHTunnel 并修复 OpenSSH 冲突)
 #      run: |
 #        # 1. 克隆官方 Luci 倉庫
@@ -139,6 +136,10 @@ jobs:
       run: |
         cd openwrt
         ./scripts/feeds install -a
+        rm -rf feeds/packages/net/{xray-core,v2ray-geodata,sing-box,chinadns-ng,dns2socks,hysteria,ipt2socks,microsocks,naiveproxy,shadowsocks-rust,shadowsocksr-libev,simple-obfs,tcping,v2ray-plugin,xray-plugin,geoview,shadow-tls}
+        git clone https://github.com/Openwrt-Passwall/openwrt-passwall-packages package/passwall-packages
+        rm -rf feeds/luci/applications/luci-app-passwall
+        git clone https://github.com/Openwrt-Passwall/openwrt-passwall package/passwall-luci
 
     - name: 加载自定义配置 (DIY-P2)
       run: |
