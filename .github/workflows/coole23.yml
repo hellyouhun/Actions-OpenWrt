@@ -112,7 +112,9 @@ jobs:
       run: |
         cd openwrt
         ./scripts/feeds update -a
-
+        #移除 openwrt feeds 自带的核心库# 移除 openwrt feeds 过时的luci版本
+        rm -rf feeds/packages/net/{xray-core,v2ray-geodata,sing-box,chinadns-ng,dns2socks,hysteria,ipt2socks,microsocks,naiveproxy,shadowsocks-rust,shadowsocksr-libev,simple-obfs,tcping,v2ray-plugin,xray-plugin,geoview,shadow-tls}
+        rm -rf feeds/luci/applications/luci-app-passwall
 #    - name: 克隆官方 Luci 倉庫 (引入 SSHTunnel 并修复 OpenSSH 冲突)
 #      run: |
 #        # 1. 克隆官方 Luci 倉庫
@@ -169,8 +171,6 @@ jobs:
       run: |
         cd openwrt
         echo "START_TIME=$(date +%s)" >> $GITHUB_ENV
-                # 强制用双线程或单线程编译 xray-core，避免内存溢出
-        make package/feeds/luci/xray-core/compile -j2 V=s || make package/feeds/custom/xray-core/compile -j2 V=s
         make -j$(nproc) || make -j1 V=s
         echo "status=success" >> $GITHUB_OUTPUT
         grep '^CONFIG_TARGET.*DEVICE.*=y' .config | sed -r 's/.*DEVICE_(.*)=y/\1/' > DEVICE_NAME
