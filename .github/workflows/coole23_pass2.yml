@@ -112,7 +112,9 @@ jobs:
       run: |
         cd openwrt
         ./scripts/feeds update -a
-
+        #移除 openwrt feeds 自带的核心库# 移除 openwrt feeds 过时的luci版本
+        rm -rf feeds/packages/net/{xray-core,v2ray-geodata,sing-box,chinadns-ng,dns2socks,hysteria,ipt2socks,microsocks,naiveproxy,shadowsocks-rust,shadowsocksr-libev,simple-obfs,tcping,v2ray-plugin,xray-plugin,geoview,shadow-tls}
+        rm -rf feeds/luci/applications/luci-app-passwall
 #    - name: 克隆官方 Luci 倉庫 (引入 SSHTunnel 并修复 OpenSSH 冲突)
 #      run: |
 #        # 1. 克隆官方 Luci 倉庫
@@ -156,16 +158,16 @@ jobs:
         echo "GOMAXPROCS=2" >> $GITHUB_ENV
         echo "GOPROXY=https://golang.org,direct" >> $GITHUB_ENV
         # 2. 动态查找 xray-core 的实际包路径
-        XRAY_PATH=$(find package/ -maxdepth 4 -type d -name "xray-core" | head -n 1)
+        #XRAY_PATH=$(find package/ -maxdepth 4 -type d -name "xray-core" | head -n 1)
     
-        if [ -n "$XRAY_PATH" ]; then
-        echo "成功定位 xray-core 路径: $XRAY_PATH"
+       # if [ -n "$XRAY_PATH" ]; then
+       # echo "成功定位 xray-core 路径: $XRAY_PATH"
          # 3. 限制 Go 的并发和线程，使用单线程强行编译该包
-        export GOMAXPROCS=1
-        make "${XRAY_PATH}/compile" -j1 V=s
-        else
-        echo "警告: 未在 package 目录下找到 xray-core 文件夹，将跳过单独编译步骤。"
-        fi
+       # export GOMAXPROCS=1
+       # make "${XRAY_PATH}/compile" -j1 V=s
+       # else
+      #  echo "警告: 未在 package 目录下找到 xray-core 文件夹，将跳过单独编译步骤。"
+      #  fi
 
     - name: 编译固件
       id: compile
