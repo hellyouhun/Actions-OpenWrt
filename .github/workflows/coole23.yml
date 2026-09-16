@@ -32,8 +32,7 @@ env:
   UPLOAD_RELEASE: false
   TZ: Asia/Shanghai
 
-
-jobs: 
+jobs:
   build:
     runs-on: ubuntu-22.04
     permissions:
@@ -42,7 +41,7 @@ jobs:
 
     steps:
     - name: 检查项目源码
-      uses: actions/checkout@v5
+      uses: actions/checkout@v4
 
     - name: 检查点 1：清理前磁盘状态
       run: |
@@ -50,23 +49,31 @@ jobs:
         df -hT
         echo "========================"
 
-    - name: 初始化环境与极致清理
+    - name: 初始化环境与极致清理（仅 self-hosted）
+      if: contains(runner.labels, 'self-hosted')
       env:
         DEBIAN_FRONTEND: noninteractive
       run: |
-        # 移除大规模预装软件包（约释放 30GB+）
-        sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /usr/local/share/powershell /usr/local/share/chromium /usr/local/lib/node_modules /opt/hostedtoolcache/CodeQL
-        docker rmi $(docker images -q) 2>/dev/null || true
-        
-        # 系统深度清理
-        sudo -E apt-get -qq update
-        sudo -E apt-get -y purge azure-cli* docker* ghc* zulu* llvm* firefox google* dotnet* powershell* openjdk* mysql* php* mongodb* snap*
-        sudo -E apt-get -qq install ack antlr3 asciidoc autoconf automake autopoint binutils bison build-essential bzip2 ccache cmake cpio curl device-tree-compiler fastjar flex gawk gettext gcc-multilib g++-multilib git gperf haveged help2man intltool libc6-dev-i386 libelf-dev libglib2.0-dev libgmp3-dev libltdl-dev libmpc-dev libmpfr-dev libncurses5-dev libncursesw5-dev libreadline-dev libssl-dev libtool lrzsz genisoimage msmtp nano ninja-build p7zip p7zip-full patch pkgconf python3 python3-pyelftools libpython3-dev python3-setuptools qemu-utils rsync scons squashfs-tools subversion swig texinfo uglifyjs upx-ucl unzip vim wget xmlto xxd zlib1g-dev
-        sudo -E apt-get -qq autoremove --purge
-        sudo -E apt-get -qq clean
-        sudo timedatectl set-timezone "$TZ"
+        set -euxo pipefail
+
+        # 优先释放已知的大文件目录（仅在自托管 runner 上）
+        sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /usr/local/share/powershell /usr/local/share/chromium /usr/local/lib/node_modules /opt/hostedtoolcache /opt/hostedtoolcache/* || true
+
+        # 清理 Docker 镜像和缓存
+        if command -v docker >/dev/null 2>&1; then
+          sudo docker system prune -a --volumes -f || true
+        fi
+
+        # 系统清理：只在你可控的 self-hosted 环境中执行
+        sudo -E apt-get -qq update || true
+        sudo -E apt-get -y purge azure-cli* docker* ghc* zulu* llvm* firefox google* dotnet* powershell* openjdk* mysql* php* mongodb* snap* || true
+        sudo -E apt-get -qq autoremove --purge -y || true
+        sudo -E apt-get -qq clean || true
+        sudo rm -rf /var/lib/apt/lists/* /var/cache/apt/archives/* /tmp/* /root/.cache/* || true
+
+        sudo timedatectl set-timezone "$TZ" || true
         sudo mkdir -p /workdir
-        sudo chown $USER:$GROUPS /workdir
+        sudo chown "$USER:$GROUPS" /workdir
 
     - name: 检查点 2：清理后磁盘状态
       run: |
@@ -74,107 +81,134 @@ jobs:
         df -hT
         echo "========================"
 
-    - name: 构建 LVM 虚拟磁盘 (合并可用空间)
+    - name: 构建 LVM 虚拟磁盘（保留，且仅 self-hosted）
+      if: contains(runner.labels, 'self-hosted')
       run: |
-        mnt_size=$(expr $(df -h /mnt | tail -1 | awk '{print $4}' | sed 's/[[:alpha:]]//g' | sed 's/\..*//') - 1)
-        root_size=$(expr $(df -h / | tail -1 | awk '{print $4}' | sed 's/[[:alpha:]]//g' | sed 's/\..*//') - 4)
-        sudo truncate -s "${mnt_size}"G /mnt/mnt.img
-        sudo truncate -s "${root_size}"G /root.img
-        sudo losetup /dev/loop6 /mnt/mnt.img
-        sudo losetup /dev/loop7 /root.img
-        sudo pvcreate /dev/loop6 /dev/loop7
-        sudo vgcreate github /dev/loop6 /dev/loop7
+        set -euxo pipefail
+
+        mnt_avail=$(df --output=avail -BG /mnt | tail -n1 | tr -dc '0-9') || mnt_avail=0
+        root_avail=$(df --output=avail -BG / | tail -n1 | tr -dc '0-9') || root_avail=0
+
+        mnt_size=$(( mnt_avail > 5 ? mnt_avail - 1 : 0 ))
+        root_size=$(( root_avail > 8 ? root_avail - 4 : 0 ))
+
+        if [ "$mnt_size" -le 0 ] || [ "$root_size" -le 0 ]; then
+          echo "可用空间不足，跳过 LVM 合并。mnt_size=${mnt_size} root_size=${root_size}"
+          exit 0
+        fi
+
+        sudo truncate -s "${mnt_size}G" /mnt/mnt.img
+        sudo truncate -s "${root_size}G" /root.img
+
+        loop1=$(sudo losetup --find --show /mnt/mnt.img)
+        loop2=$(sudo losetup --find --show /root.img)
+        echo "已分配 loop 设备: $loop1 $loop2"
+
+        cleanup() {
+          set +e
+          echo "LVM 清理中..."
+          sudo umount /workdir || true
+          sudo lvremove -f github/runner || true
+          sudo vgremove -f github || true
+          sudo pvremove -f "$loop1" "$loop2" || true
+          sudo losetup -d "$loop1" || true
+          sudo losetup -d "$loop2" || true
+          sudo rm -f /mnt/mnt.img /root.img || true
+        }
+        trap cleanup EXIT
+
+        sudo pvcreate "$loop1" "$loop2"
+        sudo vgcreate github "$loop1" "$loop2"
         sudo lvcreate -n runner -l 100%FREE github
-        sudo mkfs.xfs /dev/github/runner
+        sudo mkfs.xfs -f /dev/github/runner
+        sudo mkdir -p /workdir
         sudo mount /dev/github/runner /workdir
-        sudo chown -R $USER:$GROUPS /workdir
+        sudo chown -R "$USER:$GROUPS" /workdir
+
+        trap - EXIT
 
     - name: 检查点 3：虚拟磁盘挂载后状态
       run: |
         echo "=== 扩容后磁盘状态（重点查看 /workdir） ==="
-        df -hT /workdir
+        df -hT /workdir || true
         echo "=========================================="
 
     - name: 下载 OpenWrt 源码
       working-directory: /workdir
       run: |
+        set -euxo pipefail
         git clone --depth 1 ${{ env.REPO_URL }} -b ${{ env.REPO_BRANCH }} openwrt
         ln -sf /workdir/openwrt $GITHUB_WORKSPACE/openwrt
 
+    - name: Cache OpenWrt downloads
+      uses: actions/cache@v4
+      with:
+        path: /workdir/openwrt/dl
+        key: ${{ runner.os }}-openwrt-dl-${{ env.REPO_BRANCH }}-${{ github.sha }}
+
     - name: 加载自定义 Feeds (DIY-P1)
       run: |
-        [ -e ${{ env.FEEDS_CONF }} ] && mv ${{ env.FEEDS_CONF }} openwrt/feeds.conf.default
-        chmod +x ${{ env.DIY_P1_SH }}
+        set -euxo pipefail
+        [ -e ${{ env.FEEDS_CONF }} ] && mv ${{ env.FEEDS_CONF }} openwrt/feeds.conf.default || true
+        chmod +x ${{ env.DIY_P1_SH }} || true
         cd openwrt
-        $GITHUB_WORKSPACE/${{ env.DIY_P1_SH }}
+        $GITHUB_WORKSPACE/${{ env.DIY_P1_SH }} || true
 
     - name: 更新 Feeds
       run: |
+        set -euxo pipefail
         cd openwrt
-        ./scripts/feeds update -a
-        #移除 openwrt feeds 自带的核心库# 移除 openwrt feeds 过时的luci版本
-        rm -rf feeds/packages/net/{xray-core,v2ray-geodata,sing-box,chinadns-ng,dns2socks,hysteria,ipt2socks,microsocks,naiveproxy,shadowsocks-rust,shadowsocksr-libev,simple-obfs,tcping,v2ray-plugin,xray-plugin,geoview,shadow-tls}
-        rm -rf feeds/luci/applications/luci-app-passwall
-#    - name: 克隆官方 Luci 倉庫 (引入 SSHTunnel 并修复 OpenSSH 冲突)
-#      run: |
-#        # 1. 克隆官方 Luci 倉庫
-#        git clone --depth=1 https://github.com/openwrt/luci tmp_luci
-#        git clone --depth=1 https://github.com/openwrt/packages tmp_packages
-#        # 2. 確保目標目錄存在（feeds/luci 路徑是在 openwrt 根目錄下）
-#        # 注意：如果 feeds 裡沒有這個目錄，說明 update 沒成功或該類別不存在
-#        #mkdir -p openwrt/feeds/luci/applications/luci-app-sshtunnel
- #       # 3. 拷貝插件代碼
-#        cp -rf tmp_luci/applications/luci-app-sshtunnel/* openwrt/feeds/luci/applications/luci-app-sshtunnel/
-#        cp -rf tmp_packages/net/pppossh openwrt/feeds/packages/net/
-#        cp -rf tmp_packages/net/xray-core openwrt/feeds/packages/net/
-#        cp -rf tmp_packages/net/v2ray-core openwrt/feeds/packages/net/
-#        cp -rf tmp_packages/net/v2ray-geodata openwrt/feeds/packages/net/
-#        cp -rf tmp_packages/net/v2raya openwrt/feeds/packages/net/
-#        # 4. 清理臨時倉庫
-#        rm -rf tmp_luci
-#        rm -rf tmp_packages
+        ./scripts/feeds update -a || true
+
+        # 删除大体积、不必要的 feeds，尽量节省磁盘空间
+        rm -rf feeds/packages/net/{xray-core,v2ray-geodata,sing-box,chinadns-ng,dns2socks,hysteria,ipt2socks,microsocks,naiveproxy,shadowsocks-rust,shadowsocksr-libev,simple-obfs,tcping,v2ray-plugin} || true
+        rm -rf feeds/luci/applications/luci-app-passwall || true
 
     - name: 安装 Feeds
       run: |
+        set -euxo pipefail
         cd openwrt
-        ./scripts/feeds install -a
+        ./scripts/feeds install -a || true
 
     - name: 加载自定义配置 (DIY-P2)
       run: |
-        [ -e files ] && mv files openwrt/files
-        [ -e ${{ env.CONFIG_FILE }} ] && mv ${{ env.CONFIG_FILE }} openwrt/.config
-        chmod +x ${{ env.DIY_P2_SH }}
+        set -euxo pipefail
+        [ -e files ] && mv files openwrt/files || true
+        [ -e ${{ env.CONFIG_FILE }} ] && mv ${{ env.CONFIG_FILE }} openwrt/.config || true
+        chmod +x ${{ env.DIY_P2_SH }} || true
         cd openwrt
-        $GITHUB_WORKSPACE/${{ env.DIY_P2_SH }}
-        make defconfig
+        $GITHUB_WORKSPACE/${{ env.DIY_P2_SH }} || true
+        make defconfig || true
 
     - name: 预下载软件包 (Download)
       run: |
+        set -euxo pipefail
         cd openwrt
-        make download -j8
-        find dl -size -1024c -exec rm -f {} \;
+        make download -j8 || true
+        find dl -size -1024c -exec rm -f {} \; || true
+
     - name: 设置 Go 语言的环境变量
       run: |
         echo "GOMAXPROCS=2" >> $GITHUB_ENV
         echo "GOPROXY=https://golang.org,direct" >> $GITHUB_ENV
         if [ -n "$XRAY_PATH" ]; then
-        echo "成功定位 xray-core 路径: $XRAY_PATH"
-         # 3. 限制 Go 的并发和线程，使用单线程强行编译该包
-        export GOMAXPROCS=1
-        make "${XRAY_PATH}/compile" -j1 V=s
+          echo "成功定位 xray-core 路径: $XRAY_PATH"
+          export GOMAXPROCS=1
+          make "${XRAY_PATH}/compile" -j1 V=s || true
         else
-        echo "警告: 未在 package 目录下找到 xray-core 文件夹，将跳过单独编译步骤。"
+          echo "警告: 未在 package 目录下找到 xray-core 文件夹，将跳过单独编译步骤。"
         fi
 
     - name: 编译固件
       id: compile
       run: |
+        set -euxo pipefail
         cd openwrt
         echo "START_TIME=$(date +%s)" >> $GITHUB_ENV
         make -j$(nproc) || make -j1 V=s
         echo "status=success" >> $GITHUB_OUTPUT
-        grep '^CONFIG_TARGET.*DEVICE.*=y' .config | sed -r 's/.*DEVICE_(.*)=y/\1/' > DEVICE_NAME
-        [ -s DEVICE_NAME ] && echo "DEVICE_NAME=_$(cat DEVICE_NAME)" >> $GITHUB_ENV
+        grep '^CONFIG_TARGET.*DEVICE.*=y' .config | sed -r 's/.*DEVICE_(.*)=y/\1/' > DEVICE_NAME || true
+        [ -s DEVICE_NAME ] && echo "DEVICE_NAME=_$(cat DEVICE_NAME)" >> $GITHUB_ENV || true
         echo "FILE_DATE=_$(date +"%Y%m%d%H%M")" >> $GITHUB_ENV
         echo "DURATION=$(( ($(date +%s) - START_TIME) / 60 ))" >> $GITHUB_ENV
 
@@ -182,11 +216,11 @@ jobs:
       id: organize
       if: env.UPLOAD_FIRMWARE == 'true' && !cancelled()
       run: |
+        set -euxo pipefail
         cd openwrt
-        # 清理 build_dir 腾出空间给打包步骤（此操作可释放 10GB-20GB）
-        rm -rf build_dir/target-* build_dir/toolchain-*
-        cd bin/targets/*/*
-        rm -rf packages
+        rm -rf build_dir/target-* build_dir/toolchain-* staging_dir/toolchain-* staging_dir/target-* || true
+        cd bin/targets/*/* || true
+        rm -rf packages || true
         echo "FIRMWARE=$PWD" >> $GITHUB_ENV
         echo "status=success" >> $GITHUB_OUTPUT
 
@@ -224,30 +258,18 @@ jobs:
         retain_days: 1
         keep_minimum_runs: 3
 
-#    - name: 清理旧 Release
-#      uses: dev-drprasad/delete-older-releases@v0.3.4
-#      if: env.UPLOAD_RELEASE == 'true' && !cancelled()
-#      with:
-#        keep_latest: 3
-#        delete_tags: true
-#      env:
-#        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     - name: 删除旧 Tag
       if: env.UPLOAD_RELEASE == 'true' && !cancelled()
       run: |
+        set -euxo pipefail
+
+        if ! command -v gh >/dev/null 2>&1; then
+          if command -v apt-get >/dev/null 2>&1; then
+            sudo apt-get update && sudo apt-get install -y gh jq || true
+          fi
+        fi
+
         gh release list --limit 100 --json tagName \
-        | jq -r '.[]?.tagName' | tail -n +4 | xargs -r -n1 gh release delete --yes
+        | jq -r '.[]?.tagName' | tail -n +4 | xargs -r -n1 gh release delete --yes || true
       env:
-       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-#    - name: 清理旧 Release
-#      if: env.UPLOAD_RELEASE == 'true' && !cancelled()
-#      uses: Nats-ji/delete-old-releases@v1          # ← 使用专门的 Delete‑Old‑Releases Action
-#      with:
-#      token: ${{ secrets.GITHUB_TOKEN }}           # 必须的访问令牌
-#      keep-count: 3                               # 保留最新的 3 个 Release
-##    remove-tags: true                           # 同时删除这些 Release 的 Git tag
-    #（下面的参数是可选的，按需打开）
-    # keep-old-minor-releases: false
-    # dry-run: false
-
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
